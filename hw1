@@ -1,0 +1,55 @@
+1.2 - Tic-tac-toe
+	* Informal description
+The learning task we wish to learn is playing tic-tac-toe. Tic-tac-toe is a 2 player game with a 3x3 grid where players win by placing 3 of their symbols in a straight line; vertically, horizontgall or diagonally. The system will learn to intelligently play this game against a an opponent, human or not. 
+
+	* Describe it by stating the task, performance measure, and training experience as precicesly as possible (use eqs and diagrams)
+	
+	** Task: Playing tic-tac-toe
+	** Performance measure: Percent of games won against opponents
+	** Training experience: Playing practices games against itself or a human
+
+Traingig exp: 	
+	If you chose indirect-training, you might face the problem of credit assignment (determing, to which degree each move is the sequence deserves credit or blame for the final outcome. Difficult problem beacause the game can be lost even when early moves are optimal, if theses are later followed by poor moves). Learning from direct is easier.
+	
+	Is the distribution of training examples it will see by playing itslef generalize well to playing against a human. Can we train with both self-play and human-teacher examples ?
+	
+	* Propose a target function to be learned and a target representation.
+	** Target function. I need a ChoosMove function, ChooseMove: B -> M. It takes in a legal board state B and ouputs a move M. Target function (takes in board state B, outputs a score for that state). V: B-> {R} (R is the set of real numbers). V_hat is the approximation target function I will be learning. Could be represented with with a quadratic polynomial function of predefined board features, or an artifical Neural Net. 
+	Possible board features for the target function:
+	*** x1 number of X's
+	*** x2 number of O's
+	*** x3 Minimum plays to win for X (At the beginning 3, resets to 3 when needed)
+	*** x4 Minimum plays to win for O 
+	*** X5 X adjacency score (Maybe)
+	*** X6 O adjacency score (Maybe)
+	*** X7 X-0 adjacency score (Maybe) These adjacency score can be further exandped to left, right, top, bottom, diag. 
+	
+	Start with target function that is a linear comb of features (might explore using a NN, source code from Dr. White's class)
+	V_hat(b) = w0 + w1*x1 + w2*x2 + w3*x3 + w4*x4
+	
+	V_train(b) <- V_hat(successor(b)), successor b is when it is again the program's turn to play (after opponent's move)
+	** Use LMS for weight update algorithm if using the linear eq. SGD if using ANN
+	
+	** A training example is <b, V_train(b)>
+	
+	** The experiment generator could generate random board states. Or start from states where v_train is low, this way the system learns to improve on states it is not good at. 
+	
+	** How to simulate (weak) oponent? Maybe opponent somtimes makes a random move, or picks the second best move, or simulate different game levels for each game. Specify a rule for different game levels. 
+	
+	* Discuss main tradeoffs you consider in formulating this learning task.
+If I use linear function for target function, it might not be expressive enough to give a good approximation of V. But using a NN for example would require for training examples
+Tradeoffs in the features I am choosing? 
+Direct training experience might make my system too stochastic and not strategic enough. 
+
+	 
+1.4 Experiment generator strategies
+- Random legal board positio
+This strategy provides good coverage of the space of possible board states. The program might become a good average player, but will likely not be good at certain niche states of interest. By randomly sampling the search space of board states, we cannot focus on specific regions such as situations where winning is not an option. 
+
+- Picking up a board state from teh previous game, then applying one of the moves that was not executed
+This strategy allows the program to explore different plays for the same situation and find the best move for those situations. The downside is that it may limit the variety of board states the program is exposed to.
+
+- Generate random board states 80% of the time. For the remaining 20% pickup a state from a previous lost game, and apply a move that was not executed. 
+ 
+With this strategy the program has good general representation of how to play and win the game. But also learns-- through replaying lost games and finding strategies to avoid losing -- to avoid losing games where it can not win.
+
