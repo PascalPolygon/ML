@@ -18,11 +18,13 @@ Traingig exp:
 	Possible board features for the target function:
 	*** x1 number of X's
 	*** x2 number of O's
-	*** x3 Minimum plays to win for X (At the beginning 3, resets to 3 when needed)
+	*** x3 Minimum plays to win for X (At the beginning 3, resets to 3 when needed, can be expanded into min plays to win w straight rows, cols, or diag)
 	*** x4 Minimum plays to win for O 
 	*** X5 X adjacency score (Maybe)
 	*** X6 O adjacency score (Maybe)
 	*** X7 X-0 adjacency score (Maybe) These adjacency score can be further exandped to left, right, top, bottom, diag. 
+	*** Encode wether opponent is occupying center cell or not
+	*** We could represent the entire board, but a NN might be required then (https://www.codeproject.com/Articles/5160398/A-Tic-Tac-Toe-AI-with-Neural-Networks-and-Machine#code-game)
 	
 	Start with target function that is a linear comb of features (might explore using a NN, source code from Dr. White's class)
 	V_hat(b) = w0 + w1*x1 + w2*x2 + w3*x3 + w4*x4

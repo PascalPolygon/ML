@@ -1,0 +1,63 @@
+Chap 2 reading
+
+In general, any concept learning task
+can be described by the set of instances over which the target function is defined,
+the target function, the set of candidate hypotheses considered by the learner, and
+the set of available training examples.
+
+Instances for which c ( x ) = 1
+are called positive examples, or members of the target concept. Instances for which
+C ( X ) = 0 are called negative examples, or nonmembers of the target concept.
+
+Given a set of training examples of the target concept c , the problem faced
+by the learner is to hypothesize, or estimate, c . We use the symbol H to denote
+the set of all possible hypotheses that the learner may consider regarding the
+identity of the target concept.
+
+Lacking any further information, our assumption
+is that the best hypothesis regarding unseen instances is the hypothesis that best
+fits the observed training data. This is the fundamental assumption of inductive
+learning.
+
+The inductive learning hypothesis. Any hypothesis found to approximate the target
+function well over a sufficiently large set of training examples will also approximate
+the target function well over other unobserved examples.
+
+In the general case, as long as we assume that the hypothesis space H
+contains a hypothesis that describes the true target concept c and that the training
+data contains no errors, then the current hypothesis h can never require a revision
+in response to a negative example. To see why, recall that the current hypothesis
+h is the most specific hypothesis in H consistent with the observed positive exam-
+ples. Because the target concept c is also assumed to be in H and to be consistent
+h.
+with the positive training examples, c must be more.general_than-or-equaldo
+But the target concept c will never cover a negative example, thus neither will
+h (by the definition of more-general~han). Therefore, no revision to h will be
+required in response to any negative example.
+
+
+The key idea in the CANDIDATE-ELIMINATION
+algorithm
+is to output a description of the set of all hypotheses consistent with the train-
+algorithm computes the
+ing examples. Surprisingly, the CANDIDATE-ELIMINATION
+description of this set without explicitly enumerating all of its members. This is
+accomplished by again using the more-general-than partial ordering, this time
+to maintain a compact representation of the set of consistent hypotheses and to
+incrementally refine this representation as each new training example is encoun-
+tered.
+
+Definition: A hypothesis h is consistent with a set of training examples D if and
+only if h(x) = c(x) for each example (x, c ( x ) ) in D.
+
+Notice the key difference between this definition of consistent and our earlier
+definition of satisfies. An example x is said to satisfy hypothesis h when h(x) = 1,
+regardless of whether x is a positive or negative example of the target concept.
+However, whether such an example is consistent with h depends on the target
+concept, and in particular, whether h ( x ) = c ( x ) .
+
+Dejnition: The version space, denoted V S H V D with
+,
+respect to hypothesis space H
+and training examples D, is the subset of hypotheses from H consistent with the
+training examples in D.

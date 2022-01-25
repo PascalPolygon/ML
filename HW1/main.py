@@ -19,10 +19,12 @@ def main():
     b = exp_gen.generateBoard(weights)
     print(b)
     if b is not None:
-        b[1][1] = -1
+        # b[1][1] = -1
+        # b[2][1] = -1
+        # b[0][1] = -1
         print(b)
         board_utils.drawBoard(b)
-        perf_system.play(b, weights)
+        perf_system.play(b, weights, expressivity='compact')
 
     # print(b)
     # logger.info(b)
