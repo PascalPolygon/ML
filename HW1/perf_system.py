@@ -20,6 +20,9 @@ class PerfSystem:
         move = self.chooseMove(b)
         # Execute move
         b[move[0]][move[1]] = 1
+        v_hat = board_utils.evaluateBoardState(b, self.w, self.expressivity)
+        print(f'New V_hat = {v_hat}')
+        return b
         # x1, x2, min_x_to_v, min_o_to_v = board_utils.getStateFeatures(
         #     b, expressivity=expressivity)
         # print(f'x1: {x1}')
@@ -36,18 +39,18 @@ class PerfSystem:
     def chooseMove(self, b):
         # Get a list of possible moves (Evaluate board to see what are all the current possible legal moves)
         moves = board_utils.getLegalMoves(b)
-        print(f'Moves = {moves}')
+        # print(f'Moves = {moves}')
         # Apply the moves in a loop and recalculate v_hat to see which one maximizes it
         v_temps = []
         for m in moves:
             b[m[0]][m[1]] = 1
-            board_utils.drawBoard(b)
+            # board_utils.drawBoard(b)
             v_temp = board_utils.evaluateBoardState(
                 b, self.w, self.expressivity)
             v_temps.append(v_temp)
-            print(f'move = {m}, v_hat(b) = {v_temp}')
+            # print(f'move = {m}, v_hat(b) = {v_temp}')
             b[m[0]][m[1]] = 0  # Undo the move
-            print('----------------------------')
+            # print('----------------------------')
         optimalMove = moves[np.argmax(v_temps)]
-        print(f'Best move = {optimalMove}')
+        # print(f'Best move = {optimalMove}')
         return optimalMove

@@ -41,10 +41,10 @@ class BoardUtils:
     def evaluateBoardState(self, b, w, expressivity='full'):
         # self.getStateFeatures(b, expressivity)
         x1, x2, min_x_to_v, min_o_to_v = self.getStateFeatures(b, expressivity)
-        print(f'x1: {x1}')
-        print(f'x2: {x2}')
-        print(f'min_x_to_v: {min_x_to_v}')
-        print(f'min_o_to_v: {min_o_to_v}')
+        # print(f'x1: {x1}')
+        # print(f'x2: {x2}')
+        # print(f'min_x_to_v: {min_x_to_v}')
+        # print(f'min_o_to_v: {min_o_to_v}')
         if expressivity == 'compact':
             v_hat = w[0] + w[1]*x1 + w[2]*x2 + \
                 w[3]*min_x_to_v + w[4]*min_o_to_v
@@ -174,3 +174,33 @@ class BoardUtils:
         for r, c in zip(rows, cols):
             legalMoves.append([r, c])
         return legalMoves
+
+    def invertBoard(self, b):
+        xs = np.where(b == 1)
+        os = np.where(b == -1)
+        b[xs] = -1
+        b[os] = 1
+        return b
+
+    def gameWon(self, b, val):
+        # Check for
+        won = False
+        if (np.count_nonzero(b == val) < 3):
+            won = False
+        else:
+            for i in range(3):
+                # Check rows and cols for victory
+                if (np.count_nonzero(b[i, :] == val) == 3 or np.count_nonzero(b[:, i] == val) == 3):
+                    won = True
+            diag1 = np.array([int(b[0][0]), int(b[1][1]), int(b[2][2])])
+            diag2 = np.array([int(b[0][2]), int(b[1][1]), int(b[2][0])])
+            # Check diags for victory
+            if (np.count_nonzero(diag1 == val) == 3 or np.count_nonzero(diag2 == val) == 3):
+                won = True
+        return won
+
+    def gameTie(self, b):
+        return np.count_nonzero(b == 0) == 0 and not self.gameWon(b, 1) and not self.gameWon(b, -1)
+
+    def isFinalState(self, b):
+        return self.gameTie(b) or self.gameWon(b, 1) or self.gameWon(b, -1)
