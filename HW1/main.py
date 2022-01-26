@@ -37,21 +37,46 @@ def main():
         # print(b)
         # Run code below in a loop until it is a final state
         while(not board_utils.isFinalState(b)):
-            board_utils.drawBoard(b)
+            # board_utils.drawBoard(b)
+            print('ego')
             b = perf_system.play(b, weights, expressivity='compact')
             board_utils.drawBoard(b)
-            opponent = 'ai'
+            # opponent = 'ai'
             if opponent == 'ai':
                 # Replace X's w O's (and vice-versa) and let perf_system play again
                 ob = board_utils.invertBoard(b)
-                print(f'Opponent board')
-                board_utils.drawBoard(ob)
+                print('Playing peer')
+                print(f'Opponent')
+                # board_utils.drawBoard(ob)
                 ob = perf_system.play(ob, weights, expressivity='compact')
-                board_utils.drawBoard(ob)
+                # board_utils.drawBoard(ob)
                 b = board_utils.invertBoard(ob)
+                board_utils.drawBoard(b)
+            elif opponent == 'random':
+                ob = board_utils.invertBoard(b)
+                print('Playing random')
+                print(f'Opponent')
+                # board_utils.drawBoard(ob)
+                # ob = perf_system.play(ob, weights, expressivity='compact')
+                ob = perf_system.chooseRandomMove(ob)
+                # board_utils.drawBoard(ob)
+                b = board_utils.invertBoard(ob)
+                board_utils.drawBoard(b)
+
             print('==================================================')
+
         print('Game ended')
+        print('==================================================')
         board_utils.drawBoard(b)
+        if board_utils.gameWon(b, 1):
+            print('Won!')
+            v_train = 100
+        elif board_utils.gameWon(b, -1):
+            print('Lost.')
+            v_train = -100
+        elif board_utils.gameTie(b):
+            print('Tie.')
+            v_train = 0
 
     # print(b)
     # logger.info(b)

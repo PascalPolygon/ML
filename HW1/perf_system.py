@@ -36,6 +36,13 @@ class PerfSystem:
         #     # ChooseMove that will maximize v_hat
         # self.chooseMove(b)
 
+    def chooseRandomMove(self, b, expressivity='full'):
+        moves = board_utils.getLegalMoves(b)
+        rm = int(np.random.uniform(0, len(moves)-1))
+        print(f'random move id: {rm}')
+        b[moves[rm][0]][moves[rm][1]] = 1
+        return b
+
     def chooseMove(self, b):
         # Get a list of possible moves (Evaluate board to see what are all the current possible legal moves)
         moves = board_utils.getLegalMoves(b)
