@@ -1,0 +1,3 @@
+In order to define information gain precisely, we begin by defining a measure com-
+monly used in information theory, called entropy, that characterizes the (im)purity
+of an arbitrary collection of examples.

@@ -61,3 +61,41 @@ Dejnition: The version space, denoted V S H V D with
 respect to hypothesis space H
 and training examples D, is the subset of hypotheses from H consistent with the
 training examples in D.
+
+
+============================================================================
+
+
+2.6
+
+The version space learned by the CANDIDATE-ELIMINATION
+algorithm will con-
+verge toward the hypothesis that correctly describes the target concept, provided
+** (1) there are no errors in the training examples, and 
+** (2) there is some hypothesis
+in H that correctly describes the target concept.
+
+in this case there is an erroneous training sample the algorithm
+is certain to remove the correct target concept from the version space! Because,
+it will remove every hypothesis that is inconsistent with each training example, it
+will eliminate the true target concept from the version space as soon as this false
+negative example is encountered
+
+In general, the optimal query strategy for a concept learner is to generate
+instances that satisfy exactly half the hypotheses in the current version space.
+When this is possible, the size of the version space is reduced by half with each
+new example, and the correct target concept can therefore be found with only
+rlog2JVS11 experiments.
+
+In general, the set of all subsets of a set X is called thepowerset of X.
+
+The problem here is that with this very expressive hypothesis representation,
+the S boundary will always be simply the disjunction of the observed positive
+examples, while the G boundary will always be the negated disjunction of the
+observed negative examples.
+
+note that
+when H is the power set of X and x is some previously unobserved instance,
+then for any hypothesis h in the version space that covers x, there will be anoQerhypothesis h' in the power set that is identical to h except for its classification of
+x. And of course if h is in the version space, then h' will be as well, because it
+agrees with h on all the observed training examples.
