@@ -32,4 +32,5 @@ class ExperimentGenerator:
             # logging.info(self.TAG + "Picking state from lost game")
             print(self.TAG + "Picking state from lost game")
             print("Picking state from lost game")
+            # TODO: Get queues of lost games from main and output them here
             # Pick state from previous lost game

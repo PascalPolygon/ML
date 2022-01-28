@@ -25,6 +25,6 @@ class Generalizer:
                     # print(xs)
                     weights[i] = weights[i] + lr*(v_train - v_hat)*xs[i-1]
 
-        print(f'error = {error}')
+            # print(f'error = {error}')
 
         return weights, error

@@ -40,10 +40,10 @@ class Critic:
         # The game may not be completely done. You need to detect about to (situations) (disregard this, may be true if I go firt instead of opponent)
         if board_utils.gameWon(b, 1):
             print('Won!')
-            v_train = 100
+            v_train = 10
         elif board_utils.gameWon(b, -1):
             print('Lost.')
-            v_train = -100
+            v_train = -10
         elif board_utils.gameTie(b):
             print('Tie.')
             v_train = 0
