@@ -47,6 +47,8 @@ class Critic:
         elif board_utils.gameTie(b):
             print('Tie.')
             v_train = 0
+        print('Final board state')
+        board_utils.drawBoard(b)
         return v_train
 
     def v_hat(self, b):
