@@ -17,6 +17,7 @@ class Critic:
 
     def getTrainingExamples(self, gameTrace, w):
         v_trains = []
+        systemGameTrace = []
         # print(gameTrace)
         gameTrace.reverse()
         # print(gameTrace)
@@ -24,16 +25,23 @@ class Critic:
         for i, b in enumerate(gameTrace):
             # Starting w final state because we reversed the gameTrace
             if i == 0:
-                # This is the final state
-                v_trains.append(self.getFinalScore(b))
+                # This is the appended final state
+                v_train_final = self.getFinalScore(b)
+            # Second to last (Actual last board from perf system's perspective)
+            elif i == 1:
+                v_trains.append(v_train_final)
+                systemGameTrace.append(b)
             else:
                 # v_trains = v_hat(successor(b)) but we will use v_hat(predessor(b)) becaue we reversed the gameTrace
                 v_trains.append(self.v_hat(gameTrace[i-1]))
-         # Reverse again to get correct order
-        gameTrace.reverse()
+                systemGameTrace.append(b)
+
+        del gameTrace
+        # Reverse again to get correct order
+        systemGameTrace.reverse()
         v_trains.reverse()
 
-        return gameTrace, v_trains
+        return systemGameTrace, v_trains
 
     def getFinalScore(self, b):
         # Won, Lost on Tie?

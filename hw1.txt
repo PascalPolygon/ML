@@ -55,3 +55,6 @@ This strategy allows the program to explore different plays for the same situati
  
 With this strategy the program has good general representation of how to play and win the game. But also learns-- through replaying lost games and finding strategies to avoid losing -- to avoid losing games where it can not win.
 
+- Test with applying move that was not executed
+- Test with no change (if value function is different agent might make a different decision) **(Start here)
+

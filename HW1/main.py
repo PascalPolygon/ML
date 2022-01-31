@@ -34,7 +34,7 @@ def main():
     lostV_trains = []
 
     weights = [0.1, 0.1, 0.1, 0.1, 0.1]
-    for rnd in range(20):
+    for rnd in range(500):
         print('==================================================')
         if rnd > 0:
             vics = wins/rnd
@@ -46,10 +46,10 @@ def main():
             print(f'=============    Ties   {(ties/rnd)*100} % ==============')
 
         print('==================================================')
-        ai_opponent_percentage = 0.8
+        ai_opponent_percentage = 0.4
         # Determine if opponent is AI or random mover with some probability
         # if np.random.uniform(0.0, 1.0) > ai_opponent_percentage:
-        if random.uniform(0.0, 1.0) > ai_opponent_percentage:
+        if random.uniform(0.0, 1.0) > (1 - ai_opponent_percentage):
             # Play AI (self)
             opponent = 'ai'
         else:
@@ -62,7 +62,7 @@ def main():
         b = exp_gen.generateBoard(weights)
         board_utils.drawBoard(b)
         print(f'Old weights: {weights}')
-        f = board_utils.getStateFeatures(b, expressivity='compact')
+        # f = board_utils.getStateFeatures(b, expressivity='compact')
         if b is not None:
             gameTrace = []
             while(not board_utils.isFinalState(b)):
@@ -70,6 +70,7 @@ def main():
                 b = perf_system.play(b, weights, expressivity='compact')
                 gameTrace.append(b)
                 if board_utils.isFinalState(b):
+                    print('Final sate from loop')
                     break  # Exit the game loop
                 # opponent = 'ai'
                 if opponent == 'ai':
@@ -87,6 +88,12 @@ def main():
             print('Game ended')
             print('==================================================')
             board_utils.drawBoard(b)
+            # Append the final board state to get the v_hat of final state. This v_hat is the same as second to last
+            gameTrace.append(b)
+            # print(
+            #     f"Final board features {board_utils.getStateFeatures(b, expressivity='full')}")
+            print(
+                f"Final board features(compact) {board_utils.getStateFeatures(b, expressivity='compact')}")
             boardStates, v_trains = critic.getTrainingExamples(
                 gameTrace, weights)
             print('Training examples')
@@ -113,30 +120,29 @@ def main():
                 lostGames.append(boardStates)
                 lostV_trains.append(v_trains)
 
-    print('ERRORS')
-    print(errors)
-    print('Victories %')
-    print(victories)
+    # print('ERRORS')
+    # print(errors)
+    # print('Victories %')
+    # print(victories)
     # plt.plot(victories)
     # plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
     # plt.show()
-    print(f'Mean Won Errors ({len(wonErrors)})')
-    # print(np.mean(wonErrors))
-    print(wonErrors)
+    print(f'LMS error on won Errors ({len(wonErrors)})')
+    # print(wonErrors)
     # plt.plot(wonErrors)
     # plt.title(
     #     f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
     # plt.show()
 
     print(f'LMS error on tied games ({len(tieErrors)})')
-    print(tieErrors)
+    # print(tieErrors)
     # plt.plot(tieErrors)
     # plt.title(f'LMS tied on won games {ai_opponent_percentage*100}% sefl play')
     # plt.show()
 
     print(f'LMS error on lost games ({len(lostErrors)})')
     # print(np.mean(lostErrors))
-    print(lostErrors)
+    # print(lostErrors)
     # plt.plot(lostErrors)
     # plt.title(
     #     f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
@@ -153,6 +159,5 @@ def main():
 if __name__ == '__main__':
     # logger.info('Hello world!')
     # print('Hello world!')
-
     main()
     # sys.exit(main())

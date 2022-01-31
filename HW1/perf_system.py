@@ -1,5 +1,5 @@
 from board_utils import BoardUtils
-import numpy as np
+import random
 
 board_utils = BoardUtils()
 
@@ -36,9 +36,9 @@ class PerfSystem:
         #     # ChooseMove that will maximize v_hat
         # self.chooseMove(b)
 
-    def chooseRandomMove(self, b, expressivity='full'):
+    def chooseRandomMove(self, b):
         moves = board_utils.getLegalMoves(b)
-        rm = int(np.random.uniform(0, len(moves)-1))
+        rm = random.randint(0, len(moves)-1)
         print(f'random move id: {rm}')
         b[moves[rm][0]][moves[rm][1]] = 1
         return b
@@ -58,6 +58,6 @@ class PerfSystem:
             # print(f'move = {m}, v_hat(b) = {v_temp}')
             b[m[0]][m[1]] = 0  # Undo the move
             # print('----------------------------')
-        optimalMove = moves[np.argmax(v_temps)]
-        # print(f'Best move = {optimalMove}')
+        optimalMove = moves[v_temps.index(max(v_temps))]
+        print(f'Best move = {optimalMove}')
         return optimalMove

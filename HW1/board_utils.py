@@ -33,22 +33,27 @@ class BoardUtils:
 
         x1 = self.count2d(b, 1)
         x2 = self.count2d(b, -1)
-        x3 = self.count2d(b, 0)
+        # x3 = self.count2d(b, 0)
 
         # features = [x1, x2]
         empty_xs_in_rows, empty_os_in_rows, empty_xs_in_cols, empty_os_in_cols, empty_xs_in_diags, empty_os_in_diags = self.getMinMovesToVictory(
             b)  # For opponent
-        print(self.getMinMovesToVictory(b))
+        # print(self.getMinMovesToVictory(b))
         min_to_x_victory = empty_xs_in_rows + empty_xs_in_cols + empty_xs_in_diags
         min_to_o_victory = empty_os_in_rows + empty_os_in_cols + empty_os_in_diags
         if expressivity == 'compact':
             # min_to_x_victory = np.amin(min_to_x_victory)
             min_to_x_victory = min(min_to_x_victory)
             # min_to_o_victory = np.amin(min_to_o_victory)
-            min_to_o_victory = max(min_to_o_victory)
+            min_to_o_victory = min(min_to_o_victory)
 
-        return x1, x2, min_to_x_victory, min_to_o_victory
-        return features
+            # min_to_o_victory = max(min_to_o_victory)
+        # print(min_to_x_vic)
+        # Seems to prefer winning wi 50% ai apponenent
+        return x1, x2, (min_to_x_victory), (4-min_to_o_victory)
+        # return x1, x2, (min_to_x_victory), (4-min_to_o_victory) # Seems to prefer tying with 50% ai apponenent
+
+        # return features
 
     def evaluateBoardState(self, b, w, expressivity='full'):
         # self.getStateFeatures(b, expressivity)
@@ -117,10 +122,13 @@ class BoardUtils:
                 if n_xs > 0 and n_os > 0:
                     empty_os_in_rows.append(4)
                     empty_xs_in_rows.append(4)
+                    # empty_os_in_rows.append(3)
+                    # empty_xs_in_rows.append(3)
                 elif n_os == 0:  # No opponent marks in this row
                     # We can win using empty cells in row
                     empty_xs_in_rows.append(n_empty)
                     empty_os_in_rows.append(4)  # Opponent can't
+                    # empty_os_in_rows.append(3)  # Opponent can't
                 elif n_xs == 0:
                     empty_xs_in_rows.append(4)  # We can't win using this row
                     # Opponent can, using empty cells in row.
@@ -138,16 +146,6 @@ class BoardUtils:
         # How to address columns?
         b_T = self.transposeBoard(b)
 
-        # Manually transpose b
-        # b_T[0][0] same
-        # b_T[1][0] = b[0][1]
-        # b_T[2][0] = b[0][2]
-        # b_T[0][1] = b[1][0]
-        # # b_T[1][1] = b[1][1] Same
-        # b_T[2][1] = b[1][2]
-        # b_T[0][2] = b[2][0]
-        # b_T[1][2] = b[2][1]
-        # b_T[2][2] same
         for c in range(3):
             # n_empty = np.count_nonzero(b[:, c] == 0)
             n_empty = self.count1d(b_T[c], 0)
@@ -249,20 +247,13 @@ class BoardUtils:
     def getLegalMoves(self, b):
         # Will return coordinates of cell to place 1 in
         # rows, cols = np.where(b == 0)
-        indices = self.index_2d(b, 0)
-        legalMoves = []
-        for idx in indices:
-            legalMoves.append([idx[0], idx[1]])
-        return legalMoves
-
-    # def invertBoard(self, b):
-    #     # xs = np.where(b == 1)
-    #     xs = self.index_2d(b, 1)
-    #     # os = np.where(b == -1)
-    #     os = self.index_2d(b, -1)
-    #     b[xs] = -1
-    #     b[os] = 1
-    #     return b
+        return self.index_2d(b, 0)
+        # legalMoves = []
+        # for idx in indices:
+        #     legalMoves.append([idx[0], idx[1]])
+        # print(f'Indices: {indices}')
+        # print(f'Legal moves: {legalMoves}')
+        # return legalMoves
 
     def invertBoard(self, b):
         invertedBoard = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -284,6 +275,8 @@ class BoardUtils:
         # if (np.count_nonzero(b == val) < 3):
         if (self.count2d(b, val) < 3):
             won = False
+            # Check about to win stituations
+            # There is only one cell left
         else:
             b_T = self.transposeBoard(b)
             for i in range(3):
