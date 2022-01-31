@@ -14,8 +14,7 @@ import matplotlib.pyplot as plt
 # logger = logging.getLogger('main')
 
 
-def main():
-    # Generate random board 100% of the time, Go first 50% of the time
+def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr):
     exp_gen = ExperimentGenerator(1.0, 0.5)
     board_utils = BoardUtils()
     perf_system = PerfSystem()
@@ -36,19 +35,21 @@ def main():
     lostV_trains = []
 
     weights = [0.1, 0.1, 0.1, 0.1, 0.1]
-    for rnd in range(100):
+    for rnd in range(maxEpochs):
         print('==================================================')
         if rnd > 0:
             vics = wins/rnd
+            los = losses/rnd
+            ts = ties/rnd
             victories.append(vics)
             print(f'===================== ROUND {rnd} =======================')
             print(f'============= Victories {vics*100} % ==============')
             print(
-                f'=============   Losses  {(losses/rnd)*100} % ==============')
-            print(f'=============    Ties   {(ties/rnd)*100} % ==============')
+                f'=============   Losses  {(los)*100} % ==============')
+            print(f'=============    Ties   {(ts)*100} % ==============')
 
         print('==================================================')
-        ai_opponent_percentage = 0.9
+        # ai_opponent_percentage = selfPlayP
         # Determine if opponent is AI or random mover with some probability
         # if np.random.uniform(0.0, 1.0) > ai_opponent_percentage:
         if random.uniform(0.0, 1.0) > (1 - ai_opponent_percentage):
@@ -119,7 +120,7 @@ def main():
 
             # Update weights w Generalizer
             weights, error = generalizer.LMSWeightUpdate(
-                weights, boardStates, v_trains, lr=0.01)
+                weights, boardStates, v_trains, lr=lr)
             print(f'New weights: {weights}')
             errors.append(error)
 
@@ -166,13 +167,33 @@ def main():
     plt.title(
         f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
     plt.show()
+    return weights, [vics, los, ts]
 
-    # print('Last board in gameTrace')
-    # print('==================================================')
-    # board_utils.drawBoard(gameTrace[-1])
 
-    # print(b)
-    # logger.info(b)
+def test(weights):
+    a = '0'
+    while a is not 'y' or a is not 'Y' or a is not 'n' or a is not 'N':
+        a = input("Hello human, do you want to go first? (y/n): ")
+        if a == 'y' or a == 'Y':
+            print(a)
+            print('Ok, you go first!')
+        elif a == 'n' or a == 'N':
+            print('Ok, I go first!')
+
+
+def main():
+    maxEpochs = 100
+    lr = 0.03  # Higher lr will win more agains self but also ties less
+    selfPlay = 0.7
+    weights, stats = trainNoTeacher(maxEpochs, selfPlay, lr)
+    print(f'Weights after training: {weights}')
+    print(f'============= Victories {stats[0]} % ==============')
+    print(
+        f'=============   Losses  {stats[1]} % ==============')
+    print(f'=============    Ties   {stats[2]} % ==============')
+
+    # Test: (Play human opponent)
+    test(weights)
 
 
 if __name__ == '__main__':
