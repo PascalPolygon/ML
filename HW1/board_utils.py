@@ -50,7 +50,7 @@ class BoardUtils:
             # min_to_o_victory = max(min_to_o_victory)
         # print(min_to_x_vic)
         # Seems to prefer winning wi 50% ai apponenent
-        return x1, x2, (min_to_x_victory), (4-min_to_o_victory)
+        return x1, x2, (min_to_x_victory), (min_to_o_victory)
         # return x1, x2, (min_to_x_victory), (4-min_to_o_victory) # Seems to prefer tying with 50% ai apponenent
 
         # return features

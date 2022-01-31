@@ -6,7 +6,7 @@ from perf_system import PerfSystem
 from critic import Critic
 from generalizer import Generalizer
 import random
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 # logging.basicConfig(level=logging.INFO)
 # logging.info('Hello world!')
@@ -15,11 +15,13 @@ import random
 
 
 def main():
-    exp_gen = ExperimentGenerator(1.0)
+    # Generate random board 100% of the time, Go first 50% of the time
+    exp_gen = ExperimentGenerator(1.0, 0.5)
     board_utils = BoardUtils()
     perf_system = PerfSystem()
     critic = Critic()
     generalizer = Generalizer()
+
     wins = 0
     losses = 0
     ties = 0
@@ -34,7 +36,7 @@ def main():
     lostV_trains = []
 
     weights = [0.1, 0.1, 0.1, 0.1, 0.1]
-    for rnd in range(500):
+    for rnd in range(100):
         print('==================================================')
         if rnd > 0:
             vics = wins/rnd
@@ -46,7 +48,7 @@ def main():
             print(f'=============    Ties   {(ties/rnd)*100} % ==============')
 
         print('==================================================')
-        ai_opponent_percentage = 0.4
+        ai_opponent_percentage = 0.9
         # Determine if opponent is AI or random mover with some probability
         # if np.random.uniform(0.0, 1.0) > ai_opponent_percentage:
         if random.uniform(0.0, 1.0) > (1 - ai_opponent_percentage):
@@ -59,13 +61,29 @@ def main():
         # opponent = 'ai'  # Only play self
         # opponent = 'random'  # Only play random
         # weights = [0.1, 0.1, 0.1, 0.1, 0.1]
-        b = exp_gen.generateBoard(weights)
+        b, iGoFirst = exp_gen.generateBoard(weights, opponent)
+
         board_utils.drawBoard(b)
         print(f'Old weights: {weights}')
         # f = board_utils.getStateFeatures(b, expressivity='compact')
         if b is not None:
             gameTrace = []
             while(not board_utils.isFinalState(b)):
+                # if not iGoFirst:
+                if iGoFirst:
+                    iGoFirst = False
+                    if opponent == 'ai':  # Let opponent play since I went first
+                        # Replace X's w O's (and vice-versa) and let perf_system play again
+                        ob = board_utils.invertBoard(b)
+                        ob = perf_system.play(
+                            ob, weights, expressivity='compact')
+                        b = board_utils.invertBoard(ob)
+                    elif opponent == 'random':
+                        ob = board_utils.invertBoard(b)
+                        ob = perf_system.chooseRandomMove(ob)
+                        b = board_utils.invertBoard(ob)
+                    continue
+
                 print('ego')
                 b = perf_system.play(b, weights, expressivity='compact')
                 gameTrace.append(b)
@@ -124,29 +142,30 @@ def main():
     # print(errors)
     # print('Victories %')
     # print(victories)
-    # plt.plot(victories)
-    # plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    plt.plot(victories)
+    plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
+    plt.show()
     print(f'LMS error on won Errors ({len(wonErrors)})')
     # print(wonErrors)
-    # plt.plot(wonErrors)
-    # plt.title(
-    #     f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    plt.plot(wonErrors)
+    plt.title(
+        f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
+    plt.show()
 
     print(f'LMS error on tied games ({len(tieErrors)})')
     # print(tieErrors)
-    # plt.plot(tieErrors)
-    # plt.title(f'LMS tied on won games {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    plt.plot(tieErrors)
+    plt.title(
+        f'LMS tied on tied games {ai_opponent_percentage*100}% sefl play')
+    plt.show()
 
     print(f'LMS error on lost games ({len(lostErrors)})')
     # print(np.mean(lostErrors))
     # print(lostErrors)
-    # plt.plot(lostErrors)
-    # plt.title(
-    #     f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    plt.plot(lostErrors)
+    plt.title(
+        f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
+    plt.show()
 
     # print('Last board in gameTrace')
     # print('==================================================')
