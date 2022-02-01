@@ -50,8 +50,9 @@ class BoardUtils:
             # min_to_o_victory = max(min_to_o_victory)
         # print(min_to_x_vic)
         # Seems to prefer winning wi 50% ai apponenent
-        return x1, x2, (min_to_x_victory), (min_to_o_victory)
-        # return x1, x2, (min_to_x_victory), (4-min_to_o_victory) # Seems to prefer tying with 50% ai apponenent
+        # return x1, x2, (min_to_x_victory), (min_to_o_victory)
+        # Seems to prefer tying with 50% ai apponenent
+        return x1, x2, (min_to_x_victory), (4-min_to_o_victory)
 
         # return features
 
@@ -262,12 +263,15 @@ class BoardUtils:
 
         # if len(selfPos) > 0:
         for pos in selfPos:
-            print(pos)
+            # print(pos)
             invertedBoard[pos[0]][pos[1]] = -1
         for pos in oppnPos:
             invertedBoard[pos[0]][pos[1]] = 1
 
         return invertedBoard
+
+    def isEmpty(self, b):
+        return self.count2d(b, 0) == 9
 
     def gameWon(self, b, val):
         # Check for

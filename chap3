@@ -1,3 +1,25 @@
 In order to define information gain precisely, we begin by defining a measure com-
 monly used in information theory, called entropy, that characterizes the (im)purity
 of an arbitrary collection of examples.
+
+One interpretation of entropy from information theory is that it specifies the
+minimum number of bits of information needed to encode the classification of
+an arbitrary member of S (i.e., a member of S drawn at random with uniform
+probability).
+
+Gain(S, A) is therefore the expected reduction in entropy
+caused by knowing the value of attribute A.
+
+Put another way, Gain(S, A) is the
+information provided about the target &action value, given the value of some
+other attribute A.
+
+The value of Gain(S, A) is the number of bits saved when
+encoding the target value of an arbitrary member of S, by knowing the value of
+attribute A.
+
+Note that every example for which Outlook = Overcast is also a positive ex-
+ample of PlayTennis. Therefore, this node of the tree becomes a leaf node with
+the classification PlayTennis = Yes. In contrast, the descendants corresponding to
+Outlook = Sunny and Outlook = Rain still have nonzero entropy, and the decision
+tree will be further elaborated below these nodes.

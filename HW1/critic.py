@@ -6,6 +6,7 @@ board_utils = BoardUtils()
 class Critic:
     def __init__(self):
         self.w = []
+        self.verbose = False
 
     # def getTrainingExamples(self, gameTrace, w):
     #     self.w = w
@@ -47,16 +48,20 @@ class Critic:
         # Won, Lost on Tie?
         # The game may not be completely done. You need to detect about to (situations) (disregard this, may be true if I go firt instead of opponent)
         if board_utils.gameWon(b, 1):
-            print('Won!')
+            if self.verbose:
+                print('Won!')
             v_train = 1
         elif board_utils.gameWon(b, -1):
-            print('Lost.')
+            if self.verbose:
+                print('Lost.')
             v_train = -1
         elif board_utils.gameTie(b):
-            print('Tie.')
+            if self.verbose:
+                print('Tie.')
             v_train = 0
-        print('Final board state')
-        board_utils.drawBoard(b)
+        if self.verbose:
+            print('Final board state')
+            board_utils.drawBoard(b)
         return v_train
 
     def v_hat(self, b):

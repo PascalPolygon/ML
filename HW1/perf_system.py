@@ -8,7 +8,11 @@ class PerfSystem:
     def __init__(self):
         self.data = []
         self.w = []
+        self.verbose = False
         # self.board_utils = BoardUtils()
+
+    def setVerbose(self, verbose):
+        self.verbose = verbose
 
     def play(self, b, w, expressivity='full'):
         # Calculate v_hat
@@ -16,12 +20,14 @@ class PerfSystem:
         self.w = w
         self.expressivity = expressivity
         v_hat = board_utils.evaluateBoardState(b, self.w, self.expressivity)
-        print(f'V_hat = {v_hat}')
+        if self.verbose:
+            print(f'V_hat = {v_hat}')
         move = self.chooseMove(b)
         # Execute move
         b[move[0]][move[1]] = 1
         v_hat = board_utils.evaluateBoardState(b, self.w, self.expressivity)
-        print(f'New V_hat = {v_hat}')
+        if self.verbose:
+            print(f'New V_hat = {v_hat}')
         return b
         # x1, x2, min_x_to_v, min_o_to_v = board_utils.getStateFeatures(
         #     b, expressivity=expressivity)
@@ -39,7 +45,8 @@ class PerfSystem:
     def chooseRandomMove(self, b):
         moves = board_utils.getLegalMoves(b)
         rm = random.randint(0, len(moves)-1)
-        print(f'random move id: {rm}')
+        if self.verbose:
+            print(f'random move id: {rm}')
         b[moves[rm][0]][moves[rm][1]] = 1
         return b
 
@@ -58,6 +65,10 @@ class PerfSystem:
             # print(f'move = {m}, v_hat(b) = {v_temp}')
             b[m[0]][m[1]] = 0  # Undo the move
             # print('----------------------------')
+        if self.verbose:
+            print(f'{moves}')
+            print(f'v_temps = {v_temps}')
         optimalMove = moves[v_temps.index(max(v_temps))]
-        print(f'Best move = {optimalMove}')
+        if self.verbose:
+            print(f'Best move = {optimalMove}')
         return optimalMove

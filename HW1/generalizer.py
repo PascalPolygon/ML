@@ -6,6 +6,7 @@ board_utils = BoardUtils()
 class Generalizer:
     def __init__(self):
         self.w = []
+        self.verbose = False
 
     def LMSWeightUpdate(self, weights, boards, v_trains, lr=0.01):
         error = 0
@@ -16,7 +17,8 @@ class Generalizer:
             # print(f'Eval weights: {weights}')
             v_hat = board_utils.evaluateBoardState(
                 b, weights, expressivity='compact')
-            print(f'v_train : {v_train} | v_hat : {v_hat}')
+            if self.verbose:
+                print(f'v_train : {v_train} | v_hat : {v_hat}')
             error += (v_train - v_hat)**2
             # Update weights
             for i in range(len(weights)):
