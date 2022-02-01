@@ -38,7 +38,9 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
     generalizer.verbose = False
     critic.verbose = False
 
-    weights = [0.1, 0.1, 0.1, 0.1, 0.1]
+    # weights = [0.1, 0.1, 0.1, 0.1, 0.1]
+    weights = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+               0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
     for rnd in range(maxEpochs):
         if verbose:
             print('==================================================')
@@ -84,8 +86,10 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
                     if opponent == 'ai':  # Let opponent play since I went first
                         # Replace X's w O's (and vice-versa) and let perf_system play again
                         ob = board_utils.invertBoard(b)
+                        # ob = perf_system.play(
+                        #     ob, weights, expressivity='compact')
                         ob = perf_system.play(
-                            ob, weights, expressivity='compact')
+                            ob, weights, expressivity='full')
                         b = board_utils.invertBoard(ob)
                     elif opponent == 'random':
                         ob = board_utils.invertBoard(b)
@@ -95,7 +99,8 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
 
                 if verbose:
                     print('ego')
-                b = perf_system.play(b, weights, expressivity='compact')
+                # b = perf_system.play(b, weights, expressivity='compact')
+                b = perf_system.play(b, weights, expressivity='full')
                 gameTrace.append(b)
                 if board_utils.isFinalState(b):
                     if verbose:
@@ -105,7 +110,8 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
                 if opponent == 'ai':
                     # Replace X's w O's (and vice-versa) and let perf_system play again
                     ob = board_utils.invertBoard(b)
-                    ob = perf_system.play(ob, weights, expressivity='compact')
+                    # ob = perf_system.play(ob, weights, expressivity='compact')
+                    ob = perf_system.play(ob, weights, expressivity='full')
                     b = board_utils.invertBoard(ob)
                 elif opponent == 'random':
                     ob = board_utils.invertBoard(b)
@@ -124,8 +130,10 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
             # print(
             #     f"Final board features {board_utils.getStateFeatures(b, expressivity='full')}")
             if verbose:
+                # print(
+                #     f"Final board features(compact) {board_utils.getStateFeatures(b, expressivity='compact')}")
                 print(
-                    f"Final board features(compact) {board_utils.getStateFeatures(b, expressivity='compact')}")
+                    f"Final board features(full) {board_utils.getStateFeatures(b, expressivity='full')}")
             boardStates, v_trains = critic.getTrainingExamples(
                 gameTrace, weights)
             if verbose:
@@ -133,7 +141,9 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
                 print('==================================================')
 
             # Update weights w Generalizer
-            weights, error = generalizer.LMSWeightUpdate(
+            # weights, error = generalizer.LMSWeightUpdate(
+            #     weights, boardStates, v_trains, lr=lr)
+            weights, error = generalizer.LMSWeightUpdateFull(
                 weights, boardStates, v_trains, lr=lr)
             if verbose:
                 print(f'New weights: {weights}')
@@ -158,25 +168,25 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
     # print(errors)
     # print('Victories %')
     # print(victories)
-    # plt.plot(victories)
-    # plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    plt.plot(victories)
+    plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
+    plt.show()
     # print(f'LMS error on won Errors ({len(wonErrors)})')
     # print(wonErrors)
-    # plt.plot(wonErrors)
-    # plt.title(
-    #     f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    plt.plot(wonErrors)
+    plt.title(
+        f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
+    plt.show()
 
-    # print(f'LMS error on tied games ({len(tieErrors)})')
-    # plt.plot(tieErrors)
-    # plt.title(
-    #     f'LMS tied on tied games {ai_opponent_percentage*100}% sefl play')
-    # plt.show()
+    # # print(f'LMS error on tied games ({len(tieErrors)})')
+    plt.plot(tieErrors)
+    plt.title(
+        f'LMS tied on tied games {ai_opponent_percentage*100}% sefl play')
+    plt.show()
 
-    # print(f'LMS error on lost games ({len(lostErrors)})')
-    # # print(np.mean(lostErrors))
-    # # print(lostErrors)
+    # # print(f'LMS error on lost games ({len(lostErrors)})')
+    # # # print(np.mean(lostErrors))
+    # # # print(lostErrors)
     # plt.plot(lostErrors)
     # plt.title(
     #     f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
@@ -227,23 +237,17 @@ def playerMove(b):
 
 def computerMove(b, weights):
     print('Computer move:')
-    b = perf_system.play(b, weights, expressivity='compact')
+    # b = perf_system.play(b, weights, expressivity='compact')
+    b = perf_system.play(b, weights, expressivity='full')
     board_utils.drawBoard(b)
     return b
 
 
 def test(weights):
-    # a = '0'
-    # Empty board
-    # b = [[0, 0, 0],
-    #      [0, 0, 0],
-    #      [0, 0, 0]]
-    # while a is not 'y' or a is not 'Y' or a is not 'n' or a is not 'N':
     gameOn = True
-    # while a != 'y' and a != 'Y' and a != 'n' and a != 'N':
     while gameOn:
         a = ''
-        a = input("Hello human, do you want to go first? (y/n): ")
+        a = input("Hello human, do you want to go first? (y/n), q to quit: ")
         b = [[0, 0, 0],  # init board
              [0, 0, 0],
              [0, 0, 0]]
@@ -263,18 +267,8 @@ def test(weights):
                     break
                 # COmputer move
                 b = computerMove(b, weights)
-
-                # nb = playerMove(b)  # new board
-                # if not nb:
-                #     continue
-                # else:
-                #     b = nb
-                #     print('computer moves')
-                #     if gameOver(b):
-                #         break
-                #     # Performance system plays
-                #     b = computerMove(b, weights)
                 print('------------------------------------------')
+            gameOver(b)
         elif a == 'n' or a == 'N':
             print('Ok, I go first!')
             # perf_sytem makes first move and drawboard
@@ -295,20 +289,15 @@ def test(weights):
                 b = nb
 
                 print('------------------------------------------')
-
-        # gameOver(b)
-        # b = perf_system.play(b, weights, expressivity='compact')
-        # board_utils.drawBoard(b)
-        # r, c = getPlayerMove()
-        # b[r][c] = -1
-        # board_utils.drawBoard()
-        # if gameOver():
-        #     break
+            gameOver(b)
+        elif a == 'q' or a == 'Q':
+            print('Bye-bye!')
+            gameOn = False
 
 
 def main():
-    maxEpochs = 300
-    lr = 0.01  # Higher lr will win more agains self but also ties less
+    maxEpochs = 30000
+    lr = 0.001  # Higher lr will win more agains self but also ties less
     selfPlay = 0.9
     print('Training...')
     weights, stats = trainNoTeacher(maxEpochs, selfPlay, lr, verbose=False)

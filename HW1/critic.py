@@ -65,4 +65,5 @@ class Critic:
         return v_train
 
     def v_hat(self, b):
-        return board_utils.evaluateBoardState(b, self.w, expressivity='compact')
+        return board_utils.evaluateBoardState(b, self.w, expressivity='full')
+        # return board_utils.evaluateBoardState(b, self.w, expressivity='compact')

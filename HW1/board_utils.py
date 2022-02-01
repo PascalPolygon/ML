@@ -52,7 +52,10 @@ class BoardUtils:
         # Seems to prefer winning wi 50% ai apponenent
         # return x1, x2, (min_to_x_victory), (min_to_o_victory)
         # Seems to prefer tying with 50% ai apponenent
-        return x1, x2, (min_to_x_victory), (4-min_to_o_victory)
+        # return x1, x2, (min_to_x_victory), (4-min_to_o_victory)
+        # return x1, x2, (4-min_to_x_victory), (4-min_to_o_victory)
+        # full expressivity
+        return x1, x2, min_to_x_victory, min_to_o_victory
 
         # return features
 
@@ -66,6 +69,39 @@ class BoardUtils:
         if expressivity == 'compact':
             v_hat = w[0] + w[1]*x1 + w[2]*x2 + \
                 w[3]*min_x_to_v + w[4]*min_o_to_v
+            return v_hat
+        if expressivity == 'full':
+            # rows
+            x3 = min_x_to_v[0]
+            x4 = min_x_to_v[1]
+            x5 = min_x_to_v[2]
+            # cols
+            x6 = min_x_to_v[3]
+            x7 = min_x_to_v[4]
+            x8 = min_x_to_v[5]
+
+            # diags
+            x9 = min_x_to_v[6]
+            x10 = min_x_to_v[7]
+            # opponent
+            # rows
+            x11 = min_o_to_v[0]
+            x12 = min_o_to_v[1]
+            x13 = min_o_to_v[2]
+            # cols
+            x14 = min_o_to_v[3]
+            x15 = min_o_to_v[4]
+            x16 = min_o_to_v[5]
+            # diags
+            x17 = min_o_to_v[6]
+            x18 = min_o_to_v[7]
+
+            v_hat = w[0] + w[1]*x1 + w[2]*x2 + \
+                w[3]*x3 + w[4]*x4 + w[5]*x5 + w[6] * \
+                x6 + w[7]*x7 + w[8]*x8 + w[9]*x9 + \
+                w[10]*x10 + w[11]*11 + w[12]*12 + \
+                w[13]*13 + w[14]*x14 + w[15]*x15 + \
+                w[16]*x16 + w[17]*x17 + w[18]*x18
             return v_hat
 
     def transposeBoard(self, b):
@@ -242,7 +278,34 @@ class BoardUtils:
         # print(f'Min moves to win for X (diags): {empty_xs_in_diags}')
         # print(f'Min moves to win for O (diags): {empty_os_in_diags}')
         # print('----------------------------------------')
+        # print(empty_xs_in_rows)
+        # for i in range(len(empty_xs_in_rows)):
+        #     empty_xs_in_rows[i] = 4-empty_xs_in_rows[i]
+        # for i in range(len(empty_os_in_rows)):
+        #     empty_os_in_rows[i] = 4-empty_os_in_rows[i]
+        # for i in range(len(empty_xs_in_cols)):
+        #     empty_xs_in_cols[i] = 4-empty_xs_in_cols[i]
+        # for i in range(len(empty_os_in_cols)):
+        #     empty_os_in_cols[i] = 4-empty_os_in_cols[i]
+        # for i in range(len(empty_xs_in_diags)):
+        #     empty_xs_in_diags[i] = 4-empty_xs_in_diags[i]
+        # for i in range(len(empty_os_in_diags)):
+        #     empty_os_in_diags[i] = 4-empty_os_in_diags[i]
 
+        for i in range(len(empty_xs_in_rows)):
+            empty_xs_in_rows[i] = empty_xs_in_rows[i]
+        for i in range(len(empty_os_in_rows)):
+            empty_os_in_rows[i] = empty_os_in_rows[i]
+        for i in range(len(empty_xs_in_cols)):
+            empty_xs_in_cols[i] = empty_xs_in_cols[i]
+        for i in range(len(empty_os_in_cols)):
+            empty_os_in_cols[i] = empty_os_in_cols[i]
+        for i in range(len(empty_xs_in_diags)):
+            empty_xs_in_diags[i] = empty_xs_in_diags[i]
+        for i in range(len(empty_os_in_diags)):
+            empty_os_in_diags[i] = empty_os_in_diags[i]
+
+        # return (4-empty_xs_in_rows), (4-empty_os_in_rows), (4-empty_xs_in_cols), (4 - empty_os_in_cols), (4-empty_xs_in_diags), (4-empty_os_in_diags)
         return empty_xs_in_rows, empty_os_in_rows, empty_xs_in_cols, empty_os_in_cols, empty_xs_in_diags, empty_os_in_diags
 
     def getLegalMoves(self, b):

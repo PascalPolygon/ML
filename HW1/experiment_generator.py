@@ -55,8 +55,10 @@ class ExperimentGenerator:
                     b = board_utils.invertBoard(ob)
                 elif opponent == 'ai':
                     ob = board_utils.invertBoard(b)
+                    # ob = perf_system.play(
+                    #     ob, weights, expressivity='compact')
                     ob = perf_system.play(
-                        ob, weights, expressivity='compact')
+                        ob, weights, expressivity='full')
                     b = board_utils.invertBoard(ob)
 
             return b, iGoFirst
