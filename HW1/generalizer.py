@@ -13,7 +13,9 @@ class Generalizer:
         for b, v_train in zip(boards, v_trains):
             x1, x2, min_x_to_v, min_o_to_v = board_utils.getStateFeatures(
                 b, expressivity='compact')
+
             xs = [x1, x2, min_x_to_v, min_o_to_v]
+            # print(xs)
             # print(f'Eval weights: {weights}')
             v_hat = board_utils.evaluateBoardState(
                 b, weights, expressivity='compact')

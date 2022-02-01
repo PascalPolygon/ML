@@ -7,6 +7,7 @@ from critic import Critic
 from generalizer import Generalizer
 import random
 import matplotlib.pyplot as plt
+import sys
 
 # logging.basicConfig(level=logging.INFO)
 # logging.info('Hello world!')
@@ -19,7 +20,7 @@ critic = Critic()
 generalizer = Generalizer()
 
 
-def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
+def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=True):
 
     wins = 0
     losses = 0
@@ -38,9 +39,12 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
     generalizer.verbose = False
     critic.verbose = False
 
-    # weights = [0.1, 0.1, 0.1, 0.1, 0.1]
-    weights = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-               0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    if expressivity == 'compact':
+        weights = [0.1, 0.1, 0.1, 0.1, 0.1]
+    elif expressivity == 'full':
+        weights = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                   0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
     for rnd in range(maxEpochs):
         if verbose:
             print('==================================================')
@@ -72,7 +76,7 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
         # opponent = 'ai'  # Only play self
         # opponent = 'random'  # Only play random
         # weights = [0.1, 0.1, 0.1, 0.1, 0.1]
-        b, iGoFirst = exp_gen.generateBoard(weights, opponent)
+        b, iGoFirst = exp_gen.generateBoard(weights, opponent, expressivity)
         if verbose:
             board_utils.drawBoard(b)
             print(f'Old weights: {weights}')
@@ -88,8 +92,10 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
                         ob = board_utils.invertBoard(b)
                         # ob = perf_system.play(
                         #     ob, weights, expressivity='compact')
+                        # ob = perf_system.play(
+                        #     ob, weights, expressivity='full')
                         ob = perf_system.play(
-                            ob, weights, expressivity='full')
+                            ob, weights, expressivity)
                         b = board_utils.invertBoard(ob)
                     elif opponent == 'random':
                         ob = board_utils.invertBoard(b)
@@ -100,7 +106,7 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
                 if verbose:
                     print('ego')
                 # b = perf_system.play(b, weights, expressivity='compact')
-                b = perf_system.play(b, weights, expressivity='full')
+                b = perf_system.play(b, weights, expressivity)
                 gameTrace.append(b)
                 if board_utils.isFinalState(b):
                     if verbose:
@@ -111,7 +117,8 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
                     # Replace X's w O's (and vice-versa) and let perf_system play again
                     ob = board_utils.invertBoard(b)
                     # ob = perf_system.play(ob, weights, expressivity='compact')
-                    ob = perf_system.play(ob, weights, expressivity='full')
+                    ob = perf_system.play(
+                        ob, weights, expressivity)
                     b = board_utils.invertBoard(ob)
                 elif opponent == 'random':
                     ob = board_utils.invertBoard(b)
@@ -130,21 +137,25 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, verbose=True):
             # print(
             #     f"Final board features {board_utils.getStateFeatures(b, expressivity='full')}")
             if verbose:
-                # print(
-                #     f"Final board features(compact) {board_utils.getStateFeatures(b, expressivity='compact')}")
-                print(
-                    f"Final board features(full) {board_utils.getStateFeatures(b, expressivity='full')}")
+                if expressivity == 'compact':
+                    print(
+                        f"Final board features(compact) {board_utils.getStateFeatures(b, expressivity)}")
+                elif expressivity == 'full':
+                    print(
+                        f"Final board features(full) {board_utils.getStateFeatures(b, expressivity)}")
             boardStates, v_trains = critic.getTrainingExamples(
-                gameTrace, weights)
+                gameTrace, weights, expressivity)
             if verbose:
                 print('Training examples')
                 print('==================================================')
 
             # Update weights w Generalizer
-            # weights, error = generalizer.LMSWeightUpdate(
-            #     weights, boardStates, v_trains, lr=lr)
-            weights, error = generalizer.LMSWeightUpdateFull(
-                weights, boardStates, v_trains, lr=lr)
+            if expressivity == 'compact':
+                weights, error = generalizer.LMSWeightUpdate(
+                    weights, boardStates, v_trains, lr=lr)
+            elif expressivity == 'full':
+                weights, error = generalizer.LMSWeightUpdateFull(
+                    weights, boardStates, v_trains, lr=lr)
             if verbose:
                 print(f'New weights: {weights}')
             errors.append(error)
@@ -235,15 +246,18 @@ def playerMove(b):
         return b
 
 
-def computerMove(b, weights):
+def computerMove(b, weights, expressivity):
     print('Computer move:')
     # b = perf_system.play(b, weights, expressivity='compact')
-    b = perf_system.play(b, weights, expressivity='full')
+    b = perf_system.play(b, weights, expressivity)
     board_utils.drawBoard(b)
     return b
 
 
-def test(weights):
+def
+
+
+def test(weights, expressivity):
     gameOn = True
     while gameOn:
         a = ''
@@ -266,7 +280,8 @@ def test(weights):
                 if gameOver(b):
                     break
                 # COmputer move
-                b = computerMove(b, weights)
+                b = computerMove(b, weights, expressivity)
+                addToTrainingFile(b)
                 print('------------------------------------------')
             gameOver(b)
         elif a == 'n' or a == 'N':
@@ -279,7 +294,7 @@ def test(weights):
                     b = perf_system.chooseRandomMove(b)
                     board_utils.drawBoard(b)
                 else:
-                    b = computerMove(b, weights)
+                    b = computerMove(b, weights, expressivity)
 
                 if gameOver(b):
                     break
@@ -295,12 +310,15 @@ def test(weights):
             gameOn = False
 
 
-def main():
+def main(expressivty):
     maxEpochs = 30000
     lr = 0.001  # Higher lr will win more agains self but also ties less
     selfPlay = 0.9
+    # expressivity = 'compact'
+    # expressivity = 'full'
     print('Training...')
-    weights, stats = trainNoTeacher(maxEpochs, selfPlay, lr, verbose=False)
+    weights, stats = trainNoTeacher(
+        maxEpochs, selfPlay, lr, expressivity, verbose=False)
     print('Done!')
     print(f'Weights after training: {weights}')
     print(f'============= Victories {stats[0]} % ==============')
@@ -309,11 +327,23 @@ def main():
     print(f'=============    Ties   {stats[2]} % ==============')
 
     # Test: (Play human opponent)
-    test(weights)
+    test(weights, expressivity)
 
 
 if __name__ == '__main__':
     # logger.info('Hello world!')
     # print('Hello world!')
-    main()
+    # print(f"Arguments count: {len(sys.argv)}")
+    if len(sys.argv) == 1:
+        print('You need expressivity argument')
+        print('Example: \n"python3 main.py compact" for compact expressivity')
+        print('"python3 main.py full" for full expressivity')
+        print('compact is preferred')
+        sys.exit()
+    for i, arg in enumerate(sys.argv):
+        if i == 1:
+            expressivity = arg  # First arg is expressivity
+        # print(f"Argument {i:>6}: {arg}")
+    print(f'Expressivity: {expressivity}')
+    main(expressivity)
     # sys.exit(main())

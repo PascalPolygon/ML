@@ -27,7 +27,7 @@ class BoardUtils:
     def count1d(self, r, val):
         return sum(x == val for x in r)
 
-    def getStateFeatures(self, b, expressivity='full'):
+    def getStateFeatures(self, b, expressivity):
         # x1 = np.count_nonzero(b == 1)
         # x2 = np.count_nonzero(b == -1)
 
@@ -37,7 +37,7 @@ class BoardUtils:
 
         # features = [x1, x2]
         empty_xs_in_rows, empty_os_in_rows, empty_xs_in_cols, empty_os_in_cols, empty_xs_in_diags, empty_os_in_diags = self.getMinMovesToVictory(
-            b)  # For opponent
+            b, expressivity)  # For opponent
         # print(self.getMinMovesToVictory(b))
         min_to_x_victory = empty_xs_in_rows + empty_xs_in_cols + empty_xs_in_diags
         min_to_o_victory = empty_os_in_rows + empty_os_in_cols + empty_os_in_diags
@@ -50,16 +50,16 @@ class BoardUtils:
             # min_to_o_victory = max(min_to_o_victory)
         # print(min_to_x_vic)
         # Seems to prefer winning wi 50% ai apponenent
-        # return x1, x2, (min_to_x_victory), (min_to_o_victory)
+        return x1, x2, min_to_x_victory, min_to_o_victory
         # Seems to prefer tying with 50% ai apponenent
         # return x1, x2, (min_to_x_victory), (4-min_to_o_victory)
         # return x1, x2, (4-min_to_x_victory), (4-min_to_o_victory)
         # full expressivity
-        return x1, x2, min_to_x_victory, min_to_o_victory
+        # return x1, x2, min_to_x_victory, min_to_o_victory
 
         # return features
 
-    def evaluateBoardState(self, b, w, expressivity='full'):
+    def evaluateBoardState(self, b, w, expressivity):
         # self.getStateFeatures(b, expressivity)
         x1, x2, min_x_to_v, min_o_to_v = self.getStateFeatures(b, expressivity)
         # print(f'x1: {x1}')
@@ -70,8 +70,9 @@ class BoardUtils:
             v_hat = w[0] + w[1]*x1 + w[2]*x2 + \
                 w[3]*min_x_to_v + w[4]*min_o_to_v
             return v_hat
-        if expressivity == 'full':
+        elif expressivity == 'full':
             # rows
+            # print(f'Expressivity = {expressivity}')
             x3 = min_x_to_v[0]
             x4 = min_x_to_v[1]
             x5 = min_x_to_v[2]
@@ -142,7 +143,7 @@ class BoardUtils:
                     indices.append([i, j])
         return indices
 
-    def getMinMovesToVictory(self, b):
+    def getMinMovesToVictory(self, b, expressivity):
         empty_xs_in_rows = []
         empty_os_in_rows = []
         for r in range(3):
@@ -275,35 +276,33 @@ class BoardUtils:
         else:  # Row is empty anyone can win using this row
             empty_xs_in_diags.append(n_empty)
             empty_os_in_diags.append(n_empty)
-        # print(f'Min moves to win for X (diags): {empty_xs_in_diags}')
-        # print(f'Min moves to win for O (diags): {empty_os_in_diags}')
-        # print('----------------------------------------')
-        # print(empty_xs_in_rows)
-        # for i in range(len(empty_xs_in_rows)):
-        #     empty_xs_in_rows[i] = 4-empty_xs_in_rows[i]
-        # for i in range(len(empty_os_in_rows)):
-        #     empty_os_in_rows[i] = 4-empty_os_in_rows[i]
-        # for i in range(len(empty_xs_in_cols)):
-        #     empty_xs_in_cols[i] = 4-empty_xs_in_cols[i]
-        # for i in range(len(empty_os_in_cols)):
-        #     empty_os_in_cols[i] = 4-empty_os_in_cols[i]
-        # for i in range(len(empty_xs_in_diags)):
-        #     empty_xs_in_diags[i] = 4-empty_xs_in_diags[i]
-        # for i in range(len(empty_os_in_diags)):
-        #     empty_os_in_diags[i] = 4-empty_os_in_diags[i]
 
-        for i in range(len(empty_xs_in_rows)):
-            empty_xs_in_rows[i] = empty_xs_in_rows[i]
-        for i in range(len(empty_os_in_rows)):
-            empty_os_in_rows[i] = empty_os_in_rows[i]
-        for i in range(len(empty_xs_in_cols)):
-            empty_xs_in_cols[i] = empty_xs_in_cols[i]
-        for i in range(len(empty_os_in_cols)):
-            empty_os_in_cols[i] = empty_os_in_cols[i]
-        for i in range(len(empty_xs_in_diags)):
-            empty_xs_in_diags[i] = empty_xs_in_diags[i]
-        for i in range(len(empty_os_in_diags)):
-            empty_os_in_diags[i] = empty_os_in_diags[i]
+        if expressivity == 'full':
+            for i in range(len(empty_xs_in_rows)):
+                empty_xs_in_rows[i] = empty_xs_in_rows[i]
+            for i in range(len(empty_os_in_rows)):
+                empty_os_in_rows[i] = empty_os_in_rows[i]
+            for i in range(len(empty_xs_in_cols)):
+                empty_xs_in_cols[i] = empty_xs_in_cols[i]
+            for i in range(len(empty_os_in_cols)):
+                empty_os_in_cols[i] = empty_os_in_cols[i]
+            for i in range(len(empty_xs_in_diags)):
+                empty_xs_in_diags[i] = empty_xs_in_diags[i]
+            for i in range(len(empty_os_in_diags)):
+                empty_os_in_diags[i] = empty_os_in_diags[i]
+
+        # for i in range(len(empty_xs_in_rows)):
+        #     empty_xs_in_rows[i] = empty_xs_in_rows[i]
+        # for i in range(len(empty_os_in_rows)):
+        #     empty_os_in_rows[i] = empty_os_in_rows[i]
+        # for i in range(len(empty_xs_in_cols)):
+        #     empty_xs_in_cols[i] = empty_xs_in_cols[i]
+        # for i in range(len(empty_os_in_cols)):
+        #     empty_os_in_cols[i] = empty_os_in_cols[i]
+        # for i in range(len(empty_xs_in_diags)):
+        #     empty_xs_in_diags[i] = empty_xs_in_diags[i]
+        # for i in range(len(empty_os_in_diags)):
+        #     empty_os_in_diags[i] = empty_os_in_diags[i]
 
         # return (4-empty_xs_in_rows), (4-empty_os_in_rows), (4-empty_xs_in_cols), (4 - empty_os_in_cols), (4-empty_xs_in_diags), (4-empty_os_in_diags)
         return empty_xs_in_rows, empty_os_in_rows, empty_xs_in_cols, empty_os_in_cols, empty_xs_in_diags, empty_os_in_diags

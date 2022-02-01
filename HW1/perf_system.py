@@ -14,7 +14,7 @@ class PerfSystem:
     def setVerbose(self, verbose):
         self.verbose = verbose
 
-    def play(self, b, w, expressivity='full'):
+    def play(self, b, w, expressivity):
         # Calculate v_hat
         # Extract fetures from the board (x1, x2, x3 ,x4)
         self.w = w

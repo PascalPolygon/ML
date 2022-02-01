@@ -16,7 +16,7 @@ class Critic:
     #         b = gameHistory[size-1]  # Final board state
     #         v_train = self.getFinalScore(b)
 
-    def getTrainingExamples(self, gameTrace, w):
+    def getTrainingExamples(self, gameTrace, w, expressivity):
         v_trains = []
         systemGameTrace = []
         # print(gameTrace)
@@ -34,7 +34,7 @@ class Critic:
                 systemGameTrace.append(b)
             else:
                 # v_trains = v_hat(successor(b)) but we will use v_hat(predessor(b)) becaue we reversed the gameTrace
-                v_trains.append(self.v_hat(gameTrace[i-1]))
+                v_trains.append(self.v_hat(gameTrace[i-1], expressivity))
                 systemGameTrace.append(b)
 
         del gameTrace
@@ -64,6 +64,6 @@ class Critic:
             board_utils.drawBoard(b)
         return v_train
 
-    def v_hat(self, b):
-        return board_utils.evaluateBoardState(b, self.w, expressivity='full')
+    def v_hat(self, b, expressivity):
+        return board_utils.evaluateBoardState(b, self.w, expressivity)
         # return board_utils.evaluateBoardState(b, self.w, expressivity='compact')

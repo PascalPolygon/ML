@@ -21,7 +21,7 @@ class ExperimentGenerator:
     # Output, board state fro a new game
     # Generate random board states 80% of the time, 20% of the time pickup a state from a lost game using a queue.
 
-    def generateBoard(self, weights, opponent):
+    def generateBoard(self, weights, opponent, expressivity):
         p = random.uniform(0.0, 1.0)
         # print(p)
         iGoFirst = False
@@ -58,7 +58,7 @@ class ExperimentGenerator:
                     # ob = perf_system.play(
                     #     ob, weights, expressivity='compact')
                     ob = perf_system.play(
-                        ob, weights, expressivity='full')
+                        ob, weights, expressivity)
                     b = board_utils.invertBoard(ob)
 
             return b, iGoFirst
