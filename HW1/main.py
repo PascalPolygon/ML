@@ -254,11 +254,22 @@ def computerMove(b, weights, expressivity):
     return b
 
 
-def
+def addToTrainingFile(dojoFile, b, finalScore=None):
+    #    a_list = ["abc", "def", "ghi"]
+    # b
+    # dojoFile = open("./dojo.txt", "w")
+    for r in b:
+        dojoFile.write(f'{r}, ')
+        print(f'Saving in dojo: {r}')
+    if finalScore is not None:
+        dojoFile.write(f'Final score: {finalScore}')
+    dojoFile.write('\n')
+    # dojoFile.close()
 
 
 def test(weights, expressivity):
     gameOn = True
+    dojoFile = open("./dojo.txt", "w")
     while gameOn:
         a = ''
         a = input("Hello human, do you want to go first? (y/n), q to quit: ")
@@ -281,9 +292,10 @@ def test(weights, expressivity):
                     break
                 # COmputer move
                 b = computerMove(b, weights, expressivity)
-                addToTrainingFile(b)
+                addToTrainingFile(dojoFile, b)
                 print('------------------------------------------')
             gameOver(b)
+            addToTrainingFile(dojoFile, b, critic.getFinalScore(b))
         elif a == 'n' or a == 'N':
             print('Ok, I go first!')
             # perf_sytem makes first move and drawboard
@@ -292,6 +304,7 @@ def test(weights, expressivity):
                 if board_utils.isEmpty(b):
                     # Random move to start the game
                     b = perf_system.chooseRandomMove(b)
+                    addToTrainingFile(dojoFile, b)
                     board_utils.drawBoard(b)
                 else:
                     b = computerMove(b, weights, expressivity)
@@ -302,16 +315,20 @@ def test(weights, expressivity):
                 while not nb:
                     nb = playerMove(b)
                 b = nb
-
+                addToTrainingFile(dojoFile, b)
                 print('------------------------------------------')
             gameOver(b)
+            addToTrainingFile(dojoFile, b, critic.getFinalScore(b))
+
+            # TODO: Add final Score to training file
         elif a == 'q' or a == 'Q':
             print('Bye-bye!')
             gameOn = False
+            dojoFile.close()
 
 
 def main(expressivty):
-    maxEpochs = 30000
+    maxEpochs = 300
     lr = 0.001  # Higher lr will win more agains self but also ties less
     selfPlay = 0.9
     # expressivity = 'compact'
