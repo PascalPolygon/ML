@@ -213,7 +213,7 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
 
 
 def main(expressivty):
-    maxEpochs = 300
+    maxEpochs = 30000
     lr = 0.001  # Higher lr will win more agains self but also ties less
     selfPlay = 0.9
     # expressivity = 'compact'
