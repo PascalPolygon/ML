@@ -46,7 +46,9 @@ class Critic:
 
     def getFinalScore(self, b):
         # Won, Lost on Tie?
-        # The game may not be completely done. You need to detect about to (situations) (disregard this, may be true if I go firt instead of opponent)
+        if self.verbose:
+            print('getFinalScore of:')
+            board_utils.drawBoard(b)
         if board_utils.gameWon(b, 1):
             if self.verbose:
                 print('Won!')

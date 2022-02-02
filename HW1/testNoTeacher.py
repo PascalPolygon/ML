@@ -8,6 +8,8 @@ from generalizer import Generalizer
 import random
 import matplotlib.pyplot as plt
 import sys
+import os
+from play_utils import PlayUtils
 
 # logging.basicConfig(level=logging.INFO)
 # logging.info('Hello world!')
@@ -18,6 +20,10 @@ board_utils = BoardUtils()
 perf_system = PerfSystem()
 critic = Critic()
 generalizer = Generalizer()
+
+
+TRAINING_FILE_PATH = os.getcwd()+'/dojo.txt'
+play_utils = PlayUtils(TRAINING_FILE_PATH)
 
 
 def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=True):
@@ -203,128 +209,7 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
     #     f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
     # plt.show()
     return weights, [vics, los, ts]
-
-
-def getPlayerMove():
-    print('Enter your move, use row (0-2) and column (0-2) numbers')
-    r = input("row number: ")
-    c = input('col number: ')
-    try:
-        r = int(r)
-        c = int(c)
-    except ValueError:
-        print('**[ERROR] Input must an integer')
-        return None
-
-    if r < 0 or r > 2 or c < 0 or c > 2:
-        print('**[ERROR] You can only use numbers: (0,1,2)')
-        return None
-        # continue
-    print(f'Your move = [{r} {c}]')
-    return r, c
-
-
-def gameOver(b):
-    if (board_utils.isFinalState(b)):
-        if (board_utils.gameWon(b, 1)):
-            print('Computer win!')
-        elif (board_utils.gameWon(b, -1)):
-            print('You win')
-        return True
-    else:
-        return False
-
-
-def playerMove(b):
-    move = getPlayerMove()
-    if move is None:
-        return False
-    else:
-        r, c = move
-        b[r][c] = -1
-        board_utils.drawBoard(b)
-        return b
-
-
-def computerMove(b, weights, expressivity):
-    print('Computer move:')
-    # b = perf_system.play(b, weights, expressivity='compact')
-    b = perf_system.play(b, weights, expressivity)
-    board_utils.drawBoard(b)
-    return b
-
-
-def addToTrainingFile(dojoFile, b, finalScore=None):
-    #    a_list = ["abc", "def", "ghi"]
-    # b
-    # dojoFile = open("./dojo.txt", "w")
-    for r in b:
-        dojoFile.write(f'{r}, ')
-        print(f'Saving in dojo: {r}')
-    if finalScore is not None:
-        dojoFile.write(f'Final score: {finalScore}')
-    dojoFile.write('\n')
     # dojoFile.close()
-
-
-def test(weights, expressivity):
-    gameOn = True
-    dojoFile = open("./dojo.txt", "w")
-    while gameOn:
-        a = ''
-        a = input("Hello human, do you want to go first? (y/n), q to quit: ")
-        b = [[0, 0, 0],  # init board
-             [0, 0, 0],
-             [0, 0, 0]]
-        if a == 'y' or a == 'Y':
-            # print(a)
-            print('Ok, you go first!')
-            board_utils.drawBoard(b)
-            # Input rows and cols to play and drawboard
-            gameOn = True
-            # while gameOn:
-            while(not board_utils.isFinalState(b)):
-                nb = playerMove(b)
-                while not nb:
-                    nb = playerMove(b)
-                b = nb
-                if gameOver(b):
-                    break
-                # COmputer move
-                b = computerMove(b, weights, expressivity)
-                addToTrainingFile(dojoFile, b)
-                print('------------------------------------------')
-            gameOver(b)
-            addToTrainingFile(dojoFile, b, critic.getFinalScore(b))
-        elif a == 'n' or a == 'N':
-            print('Ok, I go first!')
-            # perf_sytem makes first move and drawboard
-            gameOn = True
-            while(not board_utils.isFinalState(b)):
-                if board_utils.isEmpty(b):
-                    # Random move to start the game
-                    b = perf_system.chooseRandomMove(b)
-                    addToTrainingFile(dojoFile, b)
-                    board_utils.drawBoard(b)
-                else:
-                    b = computerMove(b, weights, expressivity)
-
-                if gameOver(b):
-                    break
-                nb = playerMove(b)
-                while not nb:
-                    nb = playerMove(b)
-                b = nb
-                addToTrainingFile(dojoFile, b)
-                print('------------------------------------------')
-            gameOver(b)
-            addToTrainingFile(dojoFile, b, critic.getFinalScore(b))
-
-            # TODO: Add final Score to training file
-        elif a == 'q' or a == 'Q':
-            print('Bye-bye!')
-            gameOn = False
-            dojoFile.close()
 
 
 def main(expressivty):
@@ -338,23 +223,20 @@ def main(expressivty):
         maxEpochs, selfPlay, lr, expressivity, verbose=False)
     print('Done!')
     print(f'Weights after training: {weights}')
-    print(f'============= Victories {stats[0]} % ==============')
+    print(f'============= Victories {stats[0]*100} % ==============')
     print(
-        f'=============   Losses  {stats[1]} % ==============')
-    print(f'=============    Ties   {stats[2]} % ==============')
+        f'=============   Losses  {stats[1]*100} % ==============')
+    print(f'=============    Ties   {stats[2]*100} % ==============')
 
     # Test: (Play human opponent)
-    test(weights, expressivity)
+    play_utils.test(weights, expressivity)
 
 
 if __name__ == '__main__':
-    # logger.info('Hello world!')
-    # print('Hello world!')
-    # print(f"Arguments count: {len(sys.argv)}")
     if len(sys.argv) == 1:
-        print('You need expressivity argument')
-        print('Example: \n"python3 main.py compact" for compact expressivity')
-        print('"python3 main.py full" for full expressivity')
+        print('[ERROR] You need expressivity argument')
+        print('Example: \n"python3 testNoTeacher.py compact" for compact expressivity')
+        print('"python3 testNoTeacher.py full" for full expressivity')
         print('compact is preferred')
         sys.exit()
     for i, arg in enumerate(sys.argv):
