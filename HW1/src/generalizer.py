@@ -15,8 +15,6 @@ class Generalizer:
                 b, expressivity='compact')
 
             xs = [x1, x2, min_x_to_v, min_o_to_v]
-            # print(xs)
-            # print(f'Eval weights: {weights}')
             v_hat = board_utils.evaluateBoardState(
                 b, weights, expressivity='compact')
             if self.verbose:
@@ -27,10 +25,7 @@ class Generalizer:
                 if i == 0:
                     weights[i] = weights[i] + lr*(v_train - v_hat)*1
                 else:
-                    # print(xs)
                     weights[i] = weights[i] + lr*(v_train - v_hat)*xs[i-1]
-
-            # print(f'error = {error}')
 
         return weights, error
 
@@ -69,10 +64,8 @@ class Generalizer:
             x17 = min_o_to_v[6]
             x18 = min_o_to_v[7]
 
-            # xs = [x1, x2, min_x_to_v, min_o_to_v]
             xs = [x1, x2, x3, x4, x5, x6, x7, x8, x9, x10,
                   x11, x12, x13, x14, x15, x16, x17, x18]
-            # print(f'Eval weights: {weights}')
             v_hat = board_utils.evaluateBoardState(
                 b, weights, expressivity='full')
             if self.verbose:
@@ -83,9 +76,6 @@ class Generalizer:
                 if i == 0:
                     weights[i] = weights[i] + lr*(v_train - v_hat)*1
                 else:
-                    # print(xs)
                     weights[i] = weights[i] + lr*(v_train - v_hat)*xs[i-1]
-
-            # print(f'error = {error}')
 
         return weights, error

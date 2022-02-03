@@ -8,20 +8,10 @@ class Critic:
         self.w = []
         self.verbose = False
 
-    # def getTrainingExamples(self, gameTrace, w):
-    #     self.w = w
-    #     size = len(gameTrace)
-    #     v_trains = []
-    #     for i in range(size):
-    #         b = gameHistory[size-1]  # Final board state
-    #         v_train = self.getFinalScore(b)
-
     def getTrainingExamples(self, gameTrace, w, expressivity):
         v_trains = []
         systemGameTrace = []
-        # print(gameTrace)
         gameTrace.reverse()
-        # print(gameTrace)
         self.w = w
         for i, b in enumerate(gameTrace):
             # Starting w final state because we reversed the gameTrace
@@ -68,4 +58,3 @@ class Critic:
 
     def v_hat(self, b, expressivity):
         return board_utils.evaluateBoardState(b, self.w, expressivity)
-        # return board_utils.evaluateBoardState(b, self.w, expressivity='compact')

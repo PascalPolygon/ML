@@ -3,9 +3,6 @@ from board_utils import BoardUtils
 from critic import Critic
 from generalizer import Generalizer
 from perf_system import PerfSystem
-# Read input file and reprent as gameTrace
-
-# DOJO_FILE_PATH = os.getcwd()+'/dojo.txt'
 
 board_utils = BoardUtils()
 critic = Critic()
@@ -21,7 +18,10 @@ class PlayUtils:
     def test(self, weights, expressivity):
         gameOn = True
         print(self.DOJO_FILE_PATH)
-        # dojoFile = open(TRAINING_FILE_PATH, "w")
+        nWins = 0
+        nLosses = 0
+        nTies = 0
+        nGames = 0
         # Check if file is empty
         if os.path.getsize(self.DOJO_FILE_PATH) == 0:
             print('File is empty')
@@ -29,7 +29,7 @@ class PlayUtils:
         else:
             print('File is not empty')
             dojoFile = open(self.DOJO_FILE_PATH, "a")  # Open in append mode
-
+        print('Testing')
         while gameOn:
             a = ''
             a = input("Hello human, do you want to go first? (y/n), q to quit: ")
@@ -37,12 +37,10 @@ class PlayUtils:
                  [0, 0, 0],
                  [0, 0, 0]]
             if a == 'y' or a == 'Y':
-                # print(a)
                 print('Ok, you go first!')
                 board_utils.drawBoard(b)
                 # Input rows and cols to play and drawboard
                 gameOn = True
-                # while gameOn:
                 while(not board_utils.isFinalState(b)):
                     nb = self.playerMove(b)
                     while not nb:
@@ -54,6 +52,14 @@ class PlayUtils:
                     b = self.computerMove(b, weights, expressivity)
                     self.addToTrainingFile(dojoFile, b)
                     print('------------------------------------------')
+                # Update performance stats
+                nGames += 1
+                if board_utils.gameWon(b, 1):
+                    nWins += 1
+                elif board_utils.gameWon(b, -1):
+                    nLosses += 1
+                elif board_utils.gameTie(b):
+                    nTies += 1
                 self.gameOver(b)
                 self.addToTrainingFile(dojoFile, b, critic.getFinalScore(b))
             elif a == 'n' or a == 'N':
@@ -77,6 +83,14 @@ class PlayUtils:
                     b = nb
                     self.addToTrainingFile(dojoFile, b)
                     print('------------------------------------------')
+                # Update performance stats
+                nGames += 1
+                if board_utils.gameWon(b, 1):
+                    nWins += 1
+                elif board_utils.gameWon(b, -1):
+                    nLosses += 1
+                elif board_utils.gameTie(b):
+                    nTies += 1
                 self.gameOver(b)
                 self.addToTrainingFile(dojoFile, b, critic.getFinalScore(b))
             elif a == 'q' or a == 'Q':
@@ -84,19 +98,16 @@ class PlayUtils:
                 gameOn = False
                 dojoFile.close()
 
+        if nGames > 0:
+            return nGames, [nWins/nGames, nLosses/nGames, nTies/nGames]
+        else:
+            return nGames, [0, 0, 0]
+
     def addToTrainingFile(self, dojoFile, b, finalScore=None):
         for r in b:
             dojoFile.write(f'{r}; ')
         if finalScore is not None:
             dojoFile.write(f'{finalScore}')
-
-        # InvertBoard and add inverted game to training file
-        # ob = board_utils.invertBoard(b)
-        # for r in ob:
-        #     dojoFile.write(f'{r}; ')
-        # if finalScore is not None:
-        #     dojoFile.write(f'{finalScore}')
-
         dojoFile.write('\n')
 
     def gameOver(self, b):
@@ -139,7 +150,6 @@ class PlayUtils:
 
     def computerMove(self, b, weights, expressivity):
         print('Computer move:')
-        # b = perf_system.play(b, weights, expressivity='compact')
         b = perf_system.play(b, weights, expressivity)
         board_utils.drawBoard(b)
         return b

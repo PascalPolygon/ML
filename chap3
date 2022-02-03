@@ -23,3 +23,47 @@ ample of PlayTennis. Therefore, this node of the tree becomes a leaf node with
 the classification PlayTennis = Yes. In contrast, the descendants corresponding to
 Outlook = Sunny and Outlook = Rain still have nonzero entropy, and the decision
 tree will be further elaborated below these nodes.
+
+ID3 performs a simple-to-
+complex, hill-climbing search through this hypothesis space,
+
+1 ~ 3 ' s hypothesis space of all decision trees is a complete space of finite
+discrete-valued functions, relative to the available attributes. Because every
+finite discrete-valued function can be represented by some decision tree,
+
+Recall
+from Chapter 2 that inductive bias is the set of assumptions that, together with
+the training data, deductively justify the classifications assigned by the learner to
+future instances.
+
+Roughly speaking, then, the
+ID3 search strategy (a) selects in favor of shorter trees over longer ones, and
+(b) selects trees that place the attributes with highest information gain closest to
+the root.
+
+In brief, the inductive bias of ID3 follows from its search strategy, whereas
+the inductive bias of the CANDIDATE-ELIMINATION
+algorithm follows from the def-
+inition of its search space.
+
+The inductive bias of ID3 is thus a preference for certain hypotheses over
+others (e.g., for shorter hypotheses), with no hard restriction on the hypotheses that
+can be eventually enumerated. This form of bias is typically called a preference
+bias (or, alternatively, a search bias). In contrast, the bias of the CANDIDATE-
+ELIMINATION
+algorithm is in the form of a categorical restriction on the set of
+hypotheses considered. This form of bias is typically called a restriction bias (or,
+alternatively, a language bias).
+
+The essence of the
+argument here is that evolution will create internal representations that make the
+learning algorithm's inductive bias a self-fulfilling prophecy, simply because it
+can alter the representation easier than it can alter the learning algorithm.
+
+We will say that a hypothesis overfits the training examples if some other
+hypothesis that fits the training examples less well actually performs better over the
+entire distribution of instances (i.e., including instances beyond the training set).
+
+Pruning a decision node consists of
+removing the subtree rooted at that node, making it a leaf node, and assigning it
+the most common classification of the training examples affiliated with that node.

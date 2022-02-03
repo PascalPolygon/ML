@@ -5,9 +5,8 @@ from critic import Critic
 from generalizer import Generalizer
 from perf_system import PerfSystem
 from play_utils import PlayUtils
-# Read input file and reprent as gameTrace
 
-DOJO_FILE_PATH = os.getcwd()+'/dojo.txt'
+DOJO_FILE_PATH = os.getcwd()+'/dojo.txt'  # Input training file
 
 board_utils = BoardUtils()
 critic = Critic()
@@ -29,11 +28,9 @@ def reconstructBoard(boardStateElems):
         for j, val in enumerate(rowElements):
             if j == 0:
                 # Get rid of opening brace if it's first element
-                # print(val.split('['))
                 val = val.split('[')[1]
             elif j == 2:
                 # Get rid of closing brance if it's last element
-                # print(val.split(']'))
                 val = val.split(']')[0]
             b[i][j] = int(val.strip())
     return b
@@ -52,7 +49,6 @@ def trainTeacher(dojoFilePath):
     elif expressivity == 'full':
         weights = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
                    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    # weights = [0.1, 0.1, 0.1, 0.1, 0.1]
 
     with open(dojoFilePath) as dojo:
         boardStates = dojo.readlines()
@@ -62,17 +58,16 @@ def trainTeacher(dojoFilePath):
                 # Strip of white space and newline
                 stateElements[j] = stateElements[j].strip()
             if stateElements[-1] != '':
+                # This is a final state: train on this game
                 b = reconstructBoard(stateElements)
                 gameTrace.append(b)  # Append final state
                 iGameTrace.append(board_utils.invertBoard(b))
                 nGames += 2
-                # print('State is Final state')
                 if int(stateElements[-1]) == 1:
                     if verbose:
                         print('Computer won!')
                     nWins += 1
                     nLosses += 1  # Account for inverted games
-                    # Train on gameTrace
                 elif int(stateElements[-1]) == -1:
                     if verbose:
                         print('Computer lost!')
@@ -138,10 +133,16 @@ if __name__ == '__main__':
     weights, stats = trainTeacher(DOJO_FILE_PATH)
     print('Done!')
     print(f'Weights after training: {weights}')
+    print('                  TRAIN STATS')
     print(f'============= Victories {stats[0]*100} % ==============')
     print(
         f'=============   Losses  {stats[1]*100} % ==============')
     print(f'=============    Ties   {stats[2]*100} % ==============')
 
     # Test: (Play human opponent)
-    play_utils.test(weights, expressivity)
+    nGames, testStats = play_utils.test(weights, expressivity)
+    print(f'                  TEST STATS ({nGames}) games')
+    print(f'============= Victories {testStats[0]*100} % ==============')
+    print(
+        f'=============   Losses  {testStats[1]*100} % ==============')
+    print(f'=============    Ties   {testStats[2]*100} % ==============')

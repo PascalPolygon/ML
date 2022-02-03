@@ -1,20 +1,14 @@
-# import sys
-# import logging
 from experiment_generator import ExperimentGenerator
 from board_utils import BoardUtils
 from perf_system import PerfSystem
 from critic import Critic
 from generalizer import Generalizer
 import random
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import sys
 import os
 from play_utils import PlayUtils
 
-# logging.basicConfig(level=logging.INFO)
-# logging.info('Hello world!')
-# logging.basicConfig(level=logging.NOTSET)
-# logger = logging.getLogger('main')
 exp_gen = ExperimentGenerator(1.0, 0.5)
 board_utils = BoardUtils()
 perf_system = PerfSystem()
@@ -69,19 +63,14 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
 
         if verbose:
             print('==================================================')
-        # ai_opponent_percentage = selfPlayP
+
         # Determine if opponent is AI or random mover with some probability
-        # if np.random.uniform(0.0, 1.0) > ai_opponent_percentage:
         if random.uniform(0.0, 1.0) > (1 - ai_opponent_percentage):
             # Play AI (self)
             opponent = 'ai'
         else:
             # Play random mover
             opponent = 'random'
-
-        # opponent = 'ai'  # Only play self
-        # opponent = 'random'  # Only play random
-        # weights = [0.1, 0.1, 0.1, 0.1, 0.1]
         b, iGoFirst = exp_gen.generateBoard(weights, opponent, expressivity)
         if verbose:
             board_utils.drawBoard(b)
@@ -90,16 +79,11 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
         if b is not None:
             gameTrace = []
             while(not board_utils.isFinalState(b)):
-                # if not iGoFirst:
                 if iGoFirst:
                     iGoFirst = False
                     if opponent == 'ai':  # Let opponent play since I went first
                         # Replace X's w O's (and vice-versa) and let perf_system play again
                         ob = board_utils.invertBoard(b)
-                        # ob = perf_system.play(
-                        #     ob, weights, expressivity='compact')
-                        # ob = perf_system.play(
-                        #     ob, weights, expressivity='full')
                         ob = perf_system.play(
                             ob, weights, expressivity)
                         b = board_utils.invertBoard(ob)
@@ -111,18 +95,15 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
 
                 if verbose:
                     print('ego')
-                # b = perf_system.play(b, weights, expressivity='compact')
                 b = perf_system.play(b, weights, expressivity)
                 gameTrace.append(b)
                 if board_utils.isFinalState(b):
                     if verbose:
                         print('Final sate from loop')
                     break  # Exit the game loop
-                # opponent = 'ai'
                 if opponent == 'ai':
                     # Replace X's w O's (and vice-versa) and let perf_system play again
                     ob = board_utils.invertBoard(b)
-                    # ob = perf_system.play(ob, weights, expressivity='compact')
                     ob = perf_system.play(
                         ob, weights, expressivity)
                     b = board_utils.invertBoard(ob)
@@ -140,8 +121,6 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
                 board_utils.drawBoard(b)
             # Append the final board state to get the v_hat of final state. This v_hat is the same as second to last
             gameTrace.append(b)
-            # print(
-            #     f"Final board features {board_utils.getStateFeatures(b, expressivity='full')}")
             if verbose:
                 if expressivity == 'compact':
                     print(
@@ -181,55 +160,49 @@ def trainNoTeacher(maxEpochs, ai_opponent_percentage, lr, expressivity, verbose=
                 lostGames.append(boardStates)
                 lostV_trains.append(v_trains)
 
-    # print('ERRORS')
-    # print(errors)
-    # print('Victories %')
-    # print(victories)
-    plt.plot(victories)
-    plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
-    plt.show()
-    # print(f'LMS error on won Errors ({len(wonErrors)})')
-    # print(wonErrors)
-    plt.plot(wonErrors)
-    plt.title(
-        f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
-    plt.show()
+    # plt.plot(victories)
+    # plt.title(f'Victores % {ai_opponent_percentage*100}% sefl play')
+    # plt.show()
 
-    # # print(f'LMS error on tied games ({len(tieErrors)})')
-    plt.plot(tieErrors)
-    plt.title(
-        f'LMS tied on tied games {ai_opponent_percentage*100}% sefl play')
-    plt.show()
+    # plt.plot(wonErrors)
+    # plt.title(
+    #     f'LMS error on won games {ai_opponent_percentage*100}% sefl play')
+    # plt.show()
 
-    # # print(f'LMS error on lost games ({len(lostErrors)})')
-    # # # print(np.mean(lostErrors))
-    # # # print(lostErrors)
+    # plt.plot(tieErrors)
+    # plt.title(
+    #     f'LMS tied on tied games {ai_opponent_percentage*100}% sefl play')
+    # plt.show()
+
     # plt.plot(lostErrors)
     # plt.title(
     #     f'LMS tied on lost games {ai_opponent_percentage*100}% sefl play')
     # plt.show()
     return weights, [vics, los, ts]
-    # dojoFile.close()
 
 
 def main(expressivty):
     maxEpochs = 30000
     lr = 0.001  # Higher lr will win more agains self but also ties less
     selfPlay = 0.9
-    # expressivity = 'compact'
-    # expressivity = 'full'
     print('Training...')
     weights, stats = trainNoTeacher(
         maxEpochs, selfPlay, lr, expressivity, verbose=False)
     print('Done!')
     print(f'Weights after training: {weights}')
+    print('                  TRAIN STATS')
     print(f'============= Victories {stats[0]*100} % ==============')
     print(
         f'=============   Losses  {stats[1]*100} % ==============')
     print(f'=============    Ties   {stats[2]*100} % ==============')
 
     # Test: (Play human opponent)
-    play_utils.test(weights, expressivity)
+    nGames, testStats = play_utils.test(weights, expressivity)
+    print(f'                  TEST STATS ({nGames}) games')
+    print(f'============= Victories {testStats[0]*100} % ==============')
+    print(
+        f'=============   Losses  {testStats[1]*100} % ==============')
+    print(f'=============    Ties   {testStats[2]*100} % ==============')
 
 
 if __name__ == '__main__':
