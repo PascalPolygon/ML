@@ -1,8 +1,10 @@
 import os
 from learner import Learner
+from data_utils import DataUtils
 
 TENNIS_ATTR_FILE = os.getcwd()+'/tennis-attr.txt'
 TENNIS_TRAIN_FILE = os.getcwd()+'/tennis-train.txt'
+TENNIS_TRAIN_FILE_PURE = os.getcwd()+'/tennis-train-pure.txt'
 
 IRIS_ATTR_FILE = os.getcwd()+'/iris-attr.txt'
 IRIS_TRAIN_FILE = os.getcwd()+'/iris-train.txt'
@@ -50,15 +52,18 @@ def build_tree():
 def print_tree(tree, level=0):
     if tree == None:
         return
-    for i, val in enumerate(tree.values):
-        if tree.values[val] is not None:
-            valuesList = list(tree.values[val].values.items())
-            if valuesList:  # Not a leaf node
-                print('|\t' * level + str(tree.attr) + ' = ' + val)
-                print_tree(tree.values[val], level+1)
-            else:  # This is a leaf node
-                print('|\t' * level + str(tree.attr) + ' = ' +
-                      val + ' : ' + tree.values[val].attr)
+    if tree.values:
+        for i, val in enumerate(tree.values):
+            if tree.values[val] is not None:
+                valuesList = list(tree.values[val].values.items())
+                if valuesList:  # Not a leaf node
+                    print('|\t' * level + str(tree.attr) + ' = ' + val)
+                    print_tree(tree.values[val], level+1)
+                else:  # This is a leaf node
+                    print('|\t' * level + str(tree.attr) + ' = ' +
+                          val + ' : ' + tree.values[val].attr)
+    else:
+        print('|\t' * level + str(tree.attr))
 
 
 def load_attributes(file):
@@ -99,10 +104,13 @@ if __name__ == '__main__':
     testTree = build_tree()
     print_tree(testTree)
     attrs, target = load_attributes(TENNIS_ATTR_FILE)
-    learner = Learner(target)
+    print(f'Target: {target}')
+    learner = Learner(target, verbose=True)
     # attrs, target = load_attributes(IRIS_ATTR_FILE)
     trainingExamples = load_examples(TENNIS_TRAIN_FILE)
+    # trainingExamples = load_examples(TENNIS_TRAIN_FILE_PURE)
     # trainingExamples = load_examples(IRIS_TRAIN_FILE)
-    print(f'Target: {target}')
-    print(trainingExamples)
-    print(learner.build_tree(trainingExamples))
+    # print(f'Target: {target}')
+    # print(trainingExamples)
+    root = learner.build_tree(trainingExamples, target, attrs)
+    print_tree(root)
