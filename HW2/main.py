@@ -112,5 +112,13 @@ if __name__ == '__main__':
     # trainingExamples = load_examples(IRIS_TRAIN_FILE)
     # print(f'Target: {target}')
     # print(trainingExamples)
-    root = learner.build_tree(trainingExamples, target, attrs)
+    # c = list(attrs).index(attr)
+    # Make dictionaly of attributes and their index
+    attrsIndex = {}
+    for i, attr in enumerate(attrs):
+        attrsIndex[attr] = i
+    print(f'__MAIN__ - attrIndex: {attrsIndex}')
+    root = learner.build_tree(trainingExamples, target, attrs, attrsIndex)
+    print(root.attr)
+    print(root.values)
     print_tree(root)

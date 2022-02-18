@@ -1,0 +1,6 @@
+What we need is a
+unit whose output is a nonlinear function of its inputs, but whose output is also
+a differentiable function of its inputs. One solution is the sigmoid unit-a unit
+very much like a perceptron, but based on a smoothed, differentiable threshold
+function.
+
