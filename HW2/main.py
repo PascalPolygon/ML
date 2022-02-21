@@ -100,16 +100,14 @@ def load_examples(file):
 
 
 if __name__ == '__main__':
-    # print("Hello world!")
-    testTree = build_tree()
-    print_tree(testTree)
-    attrs, target = load_attributes(TENNIS_ATTR_FILE)
+    # attrs, target = load_attributes(TENNIS_ATTR_FILE)
+    attrs, target = load_attributes(IRIS_ATTR_FILE)
     print(f'Target: {target}')
-    learner = Learner(target, verbose=True)
+    learner = Learner(target, verbose=False)
     # attrs, target = load_attributes(IRIS_ATTR_FILE)
-    trainingExamples = load_examples(TENNIS_TRAIN_FILE)
+    # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
     # trainingExamples = load_examples(TENNIS_TRAIN_FILE_PURE)
-    # trainingExamples = load_examples(IRIS_TRAIN_FILE)
+    trainingExamples = load_examples(IRIS_TRAIN_FILE)
     # print(f'Target: {target}')
     # print(trainingExamples)
     # c = list(attrs).index(attr)
@@ -118,7 +116,8 @@ if __name__ == '__main__':
     for i, attr in enumerate(attrs):
         attrsIndex[attr] = i
     print(f'__MAIN__ - attrIndex: {attrsIndex}')
+    print(f'__MAIN__ - attrs: {attrs}')
     root = learner.build_tree(trainingExamples, target, attrs, attrsIndex)
-    print(root.attr)
-    print(root.values)
-    print_tree(root)
+    # print(root.attr)
+    # print(root.values)
+    # print_tree(root)
