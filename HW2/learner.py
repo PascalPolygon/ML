@@ -11,56 +11,122 @@ class Learner():
         self.target = target
         self.verbose = verbose
 
+    def build_cont_tree(self, trainingExamples, targetAttribute, attributes, attrsIndex):
+        TAG = 'BUILD-CONT-TREE'
+        print('---------------------------------------')
+        print('---------------------------------------')
+        labels = dataUtils.get_labels(trainingExamples)
+        print(f'{TAG} trainingExamples len - {len(trainingExamples)}')
+        print(f'{TAG} labels len - {len(labels)}')
+        # Check if attributes are continous. If they are: Do proper splitting and copy over all the other attrvalues. This is because continuous attributes must compete with all other attribtues
+        # print(f'{TAG} attributes - {attributes}')
+        keyList = list(attributes)
+        anyContAttr = keyList[0]
+        inputAttrs = attributes[anyContAttr]
+        # inputAttributes = dataUtils.get_cont_input_attrs(attributes, targetAttribute)
+        # print(f'{TAG} inputAttributes - {inputAttrs}')
+        isPure, targetLabel = self.check_purity(labels)
+
+        if self.verbose:
+            print(f'Labels purity: {isPure},\ntargetLabel: {targetLabel}')
+
+        if isPure:
+            return Node(targetLabel, None)
+        # print(f'BUILD-TREE: {attributes}')
+        if not attributes[anyContAttr]:
+            # Return single-node tree root, with label = most common value of Target-attribute
+            uTargets = attributes[targetAttribute]
+            mCommonLabel = dataUtils.get_mcommon_label(labels, uTargets)
+            return Node(mCommonLabel, None)
+        # attributes = dataUtils.get_cont_attrVals(attributes, trainingExamples, labels, targetAttribute, attrsIndex)
+        # print(f'{TAG} attributes (after get_cont_attrVals) - {attributes}')
+      
+        # TODO: Edit to accomodate thresholds
+        bestAttr = dataUtils.find_best_attr(
+            trainingExamples, attributes, labels, attrsIndex)
+        # print(f'{TAG} (before) inputAttrs - {inputAttrs}')
+        inputAttrs.remove(bestAttr) #Remove bestAttr from inputAttrs
+        
+        print(f'{TAG} bestAttr - {bestAttr}')
+        # print(f'{TAG} inputAttrs - {inputAttrs}')
+        root = Node(bestAttr, inputAttrs)
+        # print(f'{TAG} node attribute - {root.attr}')
+        # print(f'{TAG} node values - {root.values}')
+        # #TODO: For a continous attribute, you would would all the attribute values from all the current attributes as branchces
+        # # print(trainingExamples)
+        print(f'{TAG} inputAttributes - {inputAttrs}')
+        for attrVal in inputAttrs:
+            print(f'{TAG} attrVal - {attrVal}')
+            # examplesVal, _ = dataUtils.get_passing_cont_values(attrVal, trainingExamples, attrsIndex)
+            examplesVal = dataUtils.get_passing_training_examples(attrVal, trainingExamples, attrsIndex)
+            print(f'{TAG} passing examples - {len(examplesVal)}')
+            if not examplesVal:
+                uTargets = attributes[targetAttribute]
+                mCommonLabel = dataUtils.get_mcommon_label(labels, uTargets)
+                root.values[attrVal] = Node(mCommonLabel, None)
+            else:
+                # Remove current best attribute from attributes dictionary
+                newAttributes = attributes.copy()
+                for attr in attributes:
+                    if not attr == targetAttribute:
+                        newAttributes[attr] = inputAttrs
+                        # print(f'{TAG} newAttributes - {newAttributes}')
+                        root.values[attrVal] = self.build_cont_tree(examplesVal, targetAttribute, newAttributes, attrsIndex)
+        return root
+
     def build_tree(self, trainingExamples, targetAttribute, attributes, attrsIndex):
         # # Create a root node
         # root = Node(None, None)
         TAG = 'BUILD-TREE'
         labels = dataUtils.get_labels(trainingExamples)
         # Check if attributes are continous. If they are: Do proper splitting and copy over all the other attrvalues. This is because continuous attributes must compete with all other attribtues
-        attributes = dataUtils.get_cont_attrVals(attributes, trainingExamples, labels, targetAttribute)
-        print(f'{TAG} attributes - {attributes}')
+        # attributes = dataUtils.get_cont_attrVals(attributes, trainingExamples, labels, targetAttribute, attrsIndex)
+        # print(f'{TAG} attributes - {attributes}')
 
-        # isPure, targetLabel = self.check_purity(labels)
+        isPure, targetLabel = self.check_purity(labels)
 
-        # if self.verbose:
-        #     print(f'Labels purity: {isPure},\ntargetLabel: {targetLabel}')
+        if self.verbose:
+            print(f'Labels purity: {isPure},\ntargetLabel: {targetLabel}')
 
-        # if isPure:
-        #     return Node(targetLabel, None)
+        if isPure:
+            return Node(targetLabel, None)
         # print(f'BUILD-TREE: {attributes}')
-        # if not attributes:
-        #     # Return single-node tree root, with label = most common value of Target-attribute
-        #     mCommonLabel = dataUtils.get_mcommon_label(labels)
-        #     return Node(mCommonLabel, None)
+        if not attributes:
+            # Return single-node tree root, with label = most common value of Target-attribute
+            mCommonLabel = dataUtils.get_mcommon_label(labels)
+            return Node(mCommonLabel, None)
 
-        # # Begin main algorithm
-        # # Find attribute with highest info gain
-        # bestAttr = dataUtils.find_best_attr(
-        #     trainingExamples, attributes, labels, attrsIndex)
+        # Begin main algorithm
+        # Find attribute with highest info gain
+        # TODO: Edit to accomodate thresholds
+        bestAttr = dataUtils.find_best_attr(
+            trainingExamples, attributes, labels, attrsIndex)
+        
+        print(f'{TAG} bestAttr - {bestAttr}')
 
-        # root = Node(bestAttr, attributes[bestAttr])
+        root = Node(bestAttr, attributes[bestAttr])
         # #TODO: For a continous attribute, you would would all the attribute values from all the current attributes as branchces
         # # print(trainingExamples)
 
-        # for val in attributes[bestAttr]:
-        #     # Get example subsets that have value = val
-        #     examplesVal = dataUtils.get_val_examplesubsset(
-        #         val, trainingExamples)
-        #     # TODO: Make sure this works for continous values
-        #     if not examplesVal:
-        #         mCommonLabel = dataUtils.get_mcommon_label(labels)
-        #         root.values[val] = Node(mCommonLabel, None)
-        #     else:
-        #         # Remove the current best attribute because we already used it
-        #         if self.verbose:
-        #             print(f'BUILD-TREE - attributes: {attributes}')
-        #             print(f'BUILD-TREE - bestAttr {bestAttr}')
-        #             print(f'BUILD-TREE - ***branch***: {val}')
-        #         newAttributes = attributes.copy()
-        #         del newAttributes[bestAttr]
-        #         root.values[val] = self.build_tree(
-        #             examplesVal, targetAttribute, newAttributes, attrsIndex)
-        # return root
+        for val in attributes[bestAttr]:
+            # Get example subsets that have value = val
+            examplesVal = dataUtils.get_val_examplesubsset(
+                val, trainingExamples)
+            # TODO: Make sure this works for continous values
+            if not examplesVal:
+                mCommonLabel = dataUtils.get_mcommon_label(labels)
+                root.values[val] = Node(mCommonLabel, None)
+            else:
+                # Remove the current best attribute because we already used it
+                if self.verbose:
+                    print(f'BUILD-TREE - attributes: {attributes}')
+                    print(f'BUILD-TREE - bestAttr {bestAttr}')
+                    print(f'BUILD-TREE - ***branch***: {val}')
+                newAttributes = attributes.copy()
+                del newAttributes[bestAttr]
+                root.values[val] = self.build_tree(
+                    examplesVal, targetAttribute, newAttributes, attrsIndex)
+        return root
 
     def check_purity(self, labels):
         length = len(labels)

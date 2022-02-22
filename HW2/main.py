@@ -100,14 +100,16 @@ def load_examples(file):
 
 
 if __name__ == '__main__':
+
+    # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
     # attrs, target = load_attributes(TENNIS_ATTR_FILE)
+
+    trainingExamples = load_examples(IRIS_TRAIN_FILE)
     attrs, target = load_attributes(IRIS_ATTR_FILE)
+
     print(f'Target: {target}')
     learner = Learner(target, verbose=False)
-    # attrs, target = load_attributes(IRIS_ATTR_FILE)
-    # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
-    # trainingExamples = load_examples(TENNIS_TRAIN_FILE_PURE)
-    trainingExamples = load_examples(IRIS_TRAIN_FILE)
+    dataUtils = DataUtils()
     # print(f'Target: {target}')
     # print(trainingExamples)
     # c = list(attrs).index(attr)
@@ -117,7 +119,19 @@ if __name__ == '__main__':
         attrsIndex[attr] = i
     print(f'__MAIN__ - attrIndex: {attrsIndex}')
     print(f'__MAIN__ - attrs: {attrs}')
-    root = learner.build_tree(trainingExamples, target, attrs, attrsIndex)
+    # Check if attributes are continuous
+    keyList = list(attrs)
+
+    # print(attrs[keyList[0]][0])
+    if attrs[keyList[0]][0] == 'continuous':
+        print('Continous data!')
+        #Build tree with continous build_tree function
+        labels = dataUtils.get_labels(trainingExamples)
+        attrs = dataUtils.get_cont_attrVals(attrs, trainingExamples, labels, target, attrsIndex)
+        print(f'__MAIN__ - contAttrs: {attrs}')
+        root = learner.build_cont_tree(trainingExamples, target, attrs, attrsIndex)
+    else:
+        root = learner.build_tree(trainingExamples, target, attrs, attrsIndex)
     # print(root.attr)
     # print(root.values)
-    # print_tree(root)
+    print_tree(root)
