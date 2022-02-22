@@ -1,0 +1,5 @@
+4.3 3.0 1.1 0.1 Iris-setosa
+4.4 2.9 1.4 0.2 Iris-setosa
+5.9 3.2 4.8 1.8 Iris-versicolor
+6.0 2.2 4.0 1.0 Iris-versicolor
+6.0 2.2 5.0 1.5 Iris-virginica

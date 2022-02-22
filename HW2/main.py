@@ -1,13 +1,20 @@
 import os
 from learner import Learner
 from data_utils import DataUtils
+from testTennis import TestTennis
 
 TENNIS_ATTR_FILE = os.getcwd()+'/tennis-attr.txt'
 TENNIS_TRAIN_FILE = os.getcwd()+'/tennis-train.txt'
+
+# TENNIS_ATTR_FILE = os.getcwd()+'/tennis-attr.txt'
+TENNIS_TEST_FILE = os.getcwd()+'/tennis-test.txt'
+
 TENNIS_TRAIN_FILE_PURE = os.getcwd()+'/tennis-train-pure.txt'
 
 IRIS_ATTR_FILE = os.getcwd()+'/iris-attr.txt'
 IRIS_TRAIN_FILE = os.getcwd()+'/iris-train.txt'
+IRIS_TRAIN_FILE_DEV= os.getcwd()+'/iris-train-dev.txt'
+
 
 
 class Node:
@@ -48,24 +55,6 @@ def build_tree():
 
 # Pre-order printing
 
-
-def print_tree(tree, level=0):
-    if tree == None:
-        return
-    if tree.values:
-        for i, val in enumerate(tree.values):
-            if tree.values[val] is not None:
-                valuesList = list(tree.values[val].values.items())
-                if valuesList:  # Not a leaf node
-                    print('|\t' * level + str(tree.attr) + ' = ' + val)
-                    print_tree(tree.values[val], level+1)
-                else:  # This is a leaf node
-                    print('|\t' * level + str(tree.attr) + ' = ' +
-                          val + ' : ' + tree.values[val].attr)
-    else:
-        print('|\t' * level + str(tree.attr))
-
-
 def load_attributes(file):
     attributes = {}
     targetAttr = ''
@@ -100,16 +89,17 @@ def load_examples(file):
 
 
 if __name__ == '__main__':
-
+    TAG = '__main__'
     # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
     # attrs, target = load_attributes(TENNIS_ATTR_FILE)
-
+    
     trainingExamples = load_examples(IRIS_TRAIN_FILE)
     attrs, target = load_attributes(IRIS_ATTR_FILE)
 
-    print(f'Target: {target}')
+    # print(f'Target: {target}')
     learner = Learner(target, verbose=False)
     dataUtils = DataUtils()
+    testTennis = TestTennis()
     # print(f'Target: {target}')
     # print(trainingExamples)
     # c = list(attrs).index(attr)
@@ -117,8 +107,8 @@ if __name__ == '__main__':
     attrsIndex = {}
     for i, attr in enumerate(attrs):
         attrsIndex[attr] = i
-    print(f'__MAIN__ - attrIndex: {attrsIndex}')
-    print(f'__MAIN__ - attrs: {attrs}')
+    # print(f'__MAIN__ - attrIndex: {attrsIndex}')
+    # print(f'__MAIN__ - attrs: {attrs}')
     # Check if attributes are continuous
     keyList = list(attrs)
 
@@ -127,11 +117,28 @@ if __name__ == '__main__':
         print('Continous data!')
         #Build tree with continous build_tree function
         labels = dataUtils.get_labels(trainingExamples)
-        attrs = dataUtils.get_cont_attrVals(attrs, trainingExamples, labels, target, attrsIndex)
-        print(f'__MAIN__ - contAttrs: {attrs}')
-        root = learner.build_cont_tree(trainingExamples, target, attrs, attrsIndex)
+        # print(f'{TAG} attrs - {attrs}')
+        # contAttrVals = dataUtils.get_cont_attrVals(attrs, trainingExamples, labels)
+        # print(f'__MAIN__ - contAttrs ({len(contAttrVals)}): {contAttrVals}')
+        root = learner.build_cont_tree(trainingExamples, target, attrsIndex, attrs)
+        print(f'{TAG} Learned tree - ')
+        print('-------------------------')
+        dataUtils.print_tree(root)
+        # print(root)
+        print('-------------------------')
     else:
         root = learner.build_tree(trainingExamples, target, attrs, attrsIndex)
+        #Load test data
+        print(f'{TAG} Learned tree - ')
+        print('-------------------------')
+        dataUtils.print_tree(root)
+        print('-------------------------')
+        testExamples = load_examples(TENNIS_TEST_FILE)
+        trainAcc = testTennis.test(root, trainingExamples, attrsIndex)
+        testAcc = testTennis.test(root, testExamples, attrsIndex)
+        print(f'{TAG} Accuracy on train - {trainAcc}')
+        print(f'{TAG} Accuracy on test - {testAcc}')
+        #Write code to do inference on test data
     # print(root.attr)
     # print(root.values)
-    print_tree(root)
+    # dataUtils.print_tree(root)

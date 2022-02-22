@@ -42,10 +42,20 @@ class DataUtils():
             vals.append(example[c])
         return vals
 
+    def get_non_passing_examples(self, attrVal, examples, attrsIndex):
+        _ , indices, _ = self.get_passing_cont_values(attrVal, examples, attrsIndex)
+        nonPassingExamples = []
+        # passingContVals, indices, vals
+        for i, example in enumerate(examples):
+            if not i in indices:
+                nonPassingExamples.append(example)
+        return nonPassingExamples
+
     def get_passing_training_examples(self, attrVal, examples, attrsIndex):
         TAG = 'GET-PASS-TRN-EXMPLES'
         # print(f'{TAG} examples - {len(examples)} {examples}')
-        passingExamples , indices = self.get_passing_cont_values(attrVal, examples, attrsIndex)
+        passingExamples , indices, _ = self.get_passing_cont_values(attrVal, examples, attrsIndex)
+        # passingContVals, indices, vals
         passingTrainingExamples = []
         nonPassing = []
         # print(f'{TAG} attrVal - {attrVal}')
@@ -82,7 +92,18 @@ class DataUtils():
                 indices.append(idx)
         # print(f'{TAG} vals (after threshold) - {passingContVals}')
         # print(f'{TAG} indices (after threshold) - {indices}')
-        return passingContVals, indices
+        return passingContVals, indices, vals
+
+    def calculate_cont_attr_ratios(self, contAttrVals, examples, attrsIndex):
+        TAG = 'CALC_ATTR_RATIOS'
+        ratios = []
+        # vals - values 
+        for attrVal in contAttrVals:
+            passingContVals, _, vals = self.get_passing_cont_values(attrVal, examples, attrsIndex)
+            # Get vals: all values in this column (petal-widht)
+            ratios.append(len(passingContVals)/len(vals))
+        return ratios
+
 
     def calculate_attr_ratios(self, examples, attributes, attr, attrsIndex, vals):
         """
@@ -100,31 +121,9 @@ class DataUtils():
         # print(f'{TAG} attribute val length - {len(attrVals)}')
         for attrVal in attrVals:
             #For continous attributes, make sure the values satisfy the threshold
-            # print(f'{TAG}  attrVal - {attrVal}')
             if '-gt-' in attrVal:
-                #This is a thresold attribute value for a continous attribute
-                # make sure the values satisfy the threshold
-                
-                #Doesn't handle the case of having mixed attr values (threshold and descrete values  as attribute values for a continous attribute)
-                #Get the name of the attribute
                 passingContVals, _ = self.get_passing_cont_values(attrVal, examples, attrsIndex)
-                # attrValsElems = attrVal.split('-gt-')
-                # contAttr = attrValsElems[0]
-                # threshold = attrValsElems[1]
-                # vals = self.get_attr_values(examples, contAttr, attrsIndex)
-                # passingContVals, _ = self.get_passing_cont_values(threshold, vals)
-                # print(f'{TAG} passingContVals - {passingContVals}')
-                # print(f'{TAG} lenght of vals - {len(vals)}')
-                # print(f'{TAG} lenght of passingContVals - {len(passingContVals)}')
                 ratios.append(len(passingContVals)/len(vals))
-                # print(f'{TAG} ratio length - {len(ratios)}')
-                # #Get values of continues attribute
-                # vals = self.get_attr_values(examples, contAttr, attrsIndex)
-                # print(f'{TAG} {contAttr} vals - {vals}')
-                # #Check threshold
-                # for val in vals:
-                #     if float(val) > float(threshold):
-                #         passingContVals.append(val)
 
 
                 #TODO: Get the values from this contAttribute that satisfy the threshold
@@ -181,6 +180,39 @@ class DataUtils():
         return targetRatios
 
 
+    def find_cont_infogains(self, examples, contAttrVals, attrsIndex, attrNames):
+        TAG = 'FIND-CONT-INFOGAINS'
+        #Get attribute ratios: (For each candidate Threshold what is the % of data that passes this threshold)
+        attrRatios = self.calculate_cont_attr_ratios(contAttrVals, examples, attrsIndex)
+        # print(f'{TAG} attRatios ({len(attrRatios)}) - {attrRatios}')
+        # print(f'{TAG} contAttrsVals ({len(contAttrVals)}) - ')
+        attrTargetRatios = []
+        targetAttr = list(attrNames)[-1]
+        uTargets = attrNames[targetAttr]
+        # print(f'{TAG} targetAttr - {targetAttr}')
+        # print(f'{TAG} uTargets - {uTargets}')
+        targets = self.get_labels(examples)
+        # print(f'{TAG} targets - {targets}')
+        for i, attrVal in enumerate(contAttrVals):
+            _, indices, _ = self.get_passing_cont_values(attrVal, examples, attrsIndex)
+            # print(f'{TAG} indices - {indices}')
+            # print(f'{TAG} attrRatio - {attrRatios[i]}')
+            if not indices:
+                attrTargetRatios.append([])
+            else:
+                targetRatios = self.calculate_cont_target_ratios(indices, targets, uTargets)
+                attrTargetRatios.append(targetRatios)
+        # print(f'{TAG} attrTargetRatios - {attrTargetRatios}')
+        gains = []
+        for i, attrRatio in enumerate(attrRatios):
+                # print(attrTargetRatios[i])
+            if attrRatio > 0:
+                gains.append(attrRatio * \
+                    self.calculate_entropy(attrTargetRatios[i]))
+            else:
+                gains.append(1000000) #Super high gain for attrRatios that are zero
+        return gains
+        
 
     def find_highest_infogain(self, examples, attributes, targets, attrsIndex):
         # print(attributes)
@@ -277,13 +309,24 @@ class DataUtils():
 
         return gains, None
 
+    def find_best_cont_attr(self, examples, contAttrVals, attrsIndex, attrNames):
+        TAG = 'FIND-BEST-CON-ATTR'
+        # print(f'{TAG} contAttrVals ({len(contAttrVals)}) - {contAttrVals}')
+        # print(f'{TAG} examples - {examples}')
+        gains = self.find_cont_infogains(examples, contAttrVals, attrsIndex, attrNames)
+        # print(f'{TAG} gains ({len(gains)}) - {gains}')
+        bestAttr = contAttrVals[gains.index(min(gains))]  # Minimum value of this gain corresponds to highest information gain
+        return bestAttr
+        # self.find_highest_infogain(examples, contAttrVals)
+        # gains, candidateThresholds = self.find_highest_infogain(examples, attributes, labels, attrsIndex)
+
     def find_best_attr(self, examples, attributes, labels, attrsIndex):
         # if self.verbose:
         #     print(examples)
         TAG = 'FIND-BEST-ATTR'
         inputAttrs = list(attributes)[:-1]
         targetAttr = list(attributes)[-1]
-        print(f'{TAG} inputAttrs - {inputAttrs}')
+        # print(f'{TAG} inputAttrs - {inputAttrs}')
         # vals = self.get_attr_values(
         #     examples, targetAttr, attrsIndex) #Get values of target attribute
         # TODO: We don't need entropy to calculate the highest Info gain 
@@ -297,7 +340,7 @@ class DataUtils():
         # print(f'{TAG} candidateThresholds - {candidateThresholds}')
         if candidateThresholds is not None:
             #Continuous data
-            bestAttr = candidateThresholds[gains.index(min(gains))]
+            bestAttr = candidateThresholds[gains.index(min(gains))]  # Minimum value of this gain corresponds to highest information gain
         else:
              # Minimum value of this gain corresponds to highest information gain
             bestAttr = inputAttrs[gains.index(min(gains))]
@@ -311,48 +354,29 @@ class DataUtils():
             print(f'Gains: {gains}')
         return bestAttr
 
-    def get_cont_attrVals(self, attrs, trainingExamples, labels, targetAttr, attrsIndex):
+    
+    def get_cont_attrVals(self, attrs, trainingExamples, labels):
         TAG = "GET-CONT-ATTRVALS"
         # print(f'{TAG} pre inputAttrs - {attrs}')
         contAttrVals = [] #Continus attribute values
-        contAttrs = []
-        nonContAttrs = []
+        # contAttrs = []
 
         for i, key in enumerate(attrs):
-            # print(f'{TAG} - {key} = {attrs[key][0]}')
-            print(f'{TAG} attrVal - {attrs[key]}')
             if attrs[key][0] == 'continuous':
-                contAttrs.append(key) #Store keys of continuous attributes so we know who they are later. 
-                # print(f'{TAG} {key} Corresponding col in data: {i}')
-                #Get the corresponding data from inputExamples
+                # contAttrs.append(key) #Store keys of continuous attributes so we know who they are later. 
                 attrVals = self.get_column(trainingExamples, i)
-                # attrVals = self.get_attr_values(trainingExamples, key, attrsIndex)
                 sortedAttrVals = attrVals.copy()
                 sortedLabels = [x for _,x in sorted(zip(sortedAttrVals,labels))]
-                #Find where 
-                # print(sortedAttrVals)
-                #Sort attrVals and crate threshold
                 sortedAttrVals.sort()
                 thresholds = self.find_thresholds(sortedAttrVals, sortedLabels)
+                # print(f'{TAG} thresholds - {thresholds}')
 
                 for thrsh in thresholds:
                     contAttrVals.append(f'{key}-gt-{thrsh}')
-            else:
-                #Get attribute values of non-continous attributes
-                #Make sure this is not the target (target Attribute)
-                if not key == targetAttr:
-                    for attrVal in attrs[key]:
-                        nonContAttrs.append(attrVal)
-        
-        
-        allAttrVals = contAttrVals + nonContAttrs #also add atributes of discrete variables
-        print(f'{TAG} with duplicates: {len(allAttrVals)}')
-        allAttrVals = list(set(allAttrVals)) #Dirty hack to avoid duplicates
-        print(f'{TAG} without duplicates: {len(allAttrVals)}')
-        # print(f'{TAG} allAttrsVals -  {allAttrVals}')
-        for contAttr in contAttrs:
-            attrs[contAttr] = allAttrVals #Edit input attribute objects with newly calculate thresholds for continous attributes
-        return attrs
+        # print(f'{TAG} with duplicates: {len(contAttrVals)}')
+        # contAttrVals = list(set(contAttrVals)) #Dirty hack to avoid duplicates
+        # print(f'{TAG} without duplicates: {len(contAttrVals)}')
+        return contAttrVals
 
     def get_column(self, examples, c):
         col = []
@@ -360,14 +384,28 @@ class DataUtils():
             col.append(float(example[c]))
         return col
 
+    #Duplicates
+    # def find_thresholds(self, vals, labels):
+    #     currentLabel = labels[0]
+    #     thresholds = []
+    #     for i, labl in enumerate(labels):
+    #         if currentLabel != labl: #Adjacent examples with different classfication
+    #             currentLabel = labl
+    #             # print(f'Change between idx {i-1} and {i}')
+    #             thresholds.append((vals[i-1] + vals[i])/2)
+    #     return thresholds
+
+    #Less duplicates
     def find_thresholds(self, vals, labels):
-        currentLabel = labels[0]
+        # currentLabel = labels[0]
         thresholds = []
-        for i, labl in enumerate(labels):
-            if currentLabel != labl: #Adjacent examples with different classfication
-                currentLabel = labl
-                # print(f'Change between idx {i-1} and {i}')
-                thresholds.append((vals[i-1] + vals[i])/2)
+        i = 0
+        while i < len(labels)-1:
+            if labels[i] != labels[i+1]:
+                thresholds.append((vals[i] + vals[i+1])/2)
+                i += 2 #Skip the next one (vals[i+1]) cause we aleady used it to find a threshoold
+            else:
+                i+=1
         return thresholds
         
     def get_input_examples(self, examples):
@@ -394,3 +432,34 @@ class DataUtils():
         return uTargets[maxIdx]
         # print(f'{TAG} label - {len(labels)}')
 
+    # def print_tree(self, tree, level=0):
+    #     if tree == None:
+    #         return
+    #     if tree.values:
+    #         for i, val in enumerate(tree.values):
+    #             if tree.values[val] is not None:
+    #                 valuesList = list(tree.values[val].values.items())
+    #                 if valuesList:  # Not a leaf node
+    #                     print('|\t' * level + str(tree.attr) + ' = ' + val)
+    #                     self.print_tree(tree.values[val], level+1)
+    #                 else:  # This is a leaf node
+    #                     print('|\t' * level + str(tree.attr) + ' = ' +
+    #                         val + ' : ' + tree.values[val].attr)
+    #     else:
+    #         print('|\t' * level + str(tree.attr))
+
+    def print_tree(self, tree, level=0):
+        if tree == None:
+            return
+        if tree.values:
+            for i, val in enumerate(tree.values):
+                if tree.values[val] is not None:
+                    valuesList = list(tree.values[val].values.items())
+                    if valuesList:  # Not a leaf node
+                        print('| ' * level + str(tree.attr) + ' = ' + val)
+                        self.print_tree(tree.values[val], level+1)
+                    else:  # This is a leaf node
+                        print('| ' * level + str(tree.attr) + ' = ' +
+                            val + ' : ' + tree.values[val].attr)
+        else:
+            print('| ' * level + str(tree.attr))
