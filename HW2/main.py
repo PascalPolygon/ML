@@ -40,16 +40,16 @@ def build_tree():
     root.values['sunny'].values['hot'].values["high"] = Node(
         "Wind", windValues)
     root.values['sunny'].values['hot'].values["high"].values["strong"] = Node(
-        "n", None)
+        "No", None)
     root.values['sunny'].values['hot'].values["high"].values["weak"] = Node(
-        "y", None)
+        "Yes", None)
 
     root.values['sunny'].values['cool'] = Node("Wind", windValues)
-    root.values['sunny'].values['cool'].values['weak'] = Node("y", None)
-    root.values['sunny'].values['cool'].values['strong'] = Node("n", None)
+    root.values['sunny'].values['cool'].values['weak'] = Node("Yes", None)
+    root.values['sunny'].values['cool'].values['strong'] = Node("No", None)
 
-    root.values['overcast'] = Node("n", None)
-    root.values['rain'] = Node("y", None)
+    root.values['overcast'] = Node("No", None)
+    root.values['rain'] = Node("Yes", None)
 
     return root
 
@@ -90,26 +90,23 @@ def load_examples(file):
 
 if __name__ == '__main__':
     TAG = '__main__'
-    # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
-    # attrs, target = load_attributes(TENNIS_ATTR_FILE)
-    
+    dataUtils = DataUtils()
+    # root = build_tree()
+
+    # dataUtils.print_tree(root)
+    # rules = dataUtils.print_rules('', root)
     trainingExamples = load_examples(IRIS_TRAIN_FILE)
     attrs, target = load_attributes(IRIS_ATTR_FILE)
 
-    # print(f'Target: {target}')
+    # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
+    # attrs, target = load_attributes(TENNIS_ATTR_FILE)
+
     learner = Learner(target, verbose=False)
     dataUtils = DataUtils()
     testTennis = TestTennis()
-    # print(f'Target: {target}')
-    # print(trainingExamples)
-    # c = list(attrs).index(attr)
-    # Make dictionaly of attributes and their index
     attrsIndex = {}
     for i, attr in enumerate(attrs):
         attrsIndex[attr] = i
-    # print(f'__MAIN__ - attrIndex: {attrsIndex}')
-    # print(f'__MAIN__ - attrs: {attrs}')
-    # Check if attributes are continuous
     keyList = list(attrs)
 
     # print(attrs[keyList[0]][0])
@@ -117,15 +114,17 @@ if __name__ == '__main__':
         print('Continous data!')
         #Build tree with continous build_tree function
         labels = dataUtils.get_labels(trainingExamples)
-        # print(f'{TAG} attrs - {attrs}')
-        # contAttrVals = dataUtils.get_cont_attrVals(attrs, trainingExamples, labels)
-        # print(f'__MAIN__ - contAttrs ({len(contAttrVals)}): {contAttrVals}')
         root = learner.build_cont_tree(trainingExamples, target, attrsIndex, attrs)
         print(f'{TAG} Learned tree - ')
         print('-------------------------')
         dataUtils.print_tree(root)
         # print(root)
         print('-------------------------')
+        # rules = dataUtils.make_rules(root)
+        dataUtils.make_rules('', root)
+        # print(dataUtils.globalRules)
+        for rule in dataUtils.globalRules:
+            print(rule)
     else:
         root = learner.build_tree(trainingExamples, target, attrs, attrsIndex)
         #Load test data
@@ -133,12 +132,15 @@ if __name__ == '__main__':
         print('-------------------------')
         dataUtils.print_tree(root)
         print('-------------------------')
+
+        # rules = dataUtils.make_rules(root)
+        dataUtils.make_rules('', root)
+        # print(dataUtils.globalRules)
+        for rule in dataUtils.globalRules:
+            print(rule)
+
         testExamples = load_examples(TENNIS_TEST_FILE)
         trainAcc = testTennis.test(root, trainingExamples, attrsIndex)
         testAcc = testTennis.test(root, testExamples, attrsIndex)
         print(f'{TAG} Accuracy on train - {trainAcc}')
         print(f'{TAG} Accuracy on test - {testAcc}')
-        #Write code to do inference on test data
-    # print(root.attr)
-    # print(root.values)
-    # dataUtils.print_tree(root)

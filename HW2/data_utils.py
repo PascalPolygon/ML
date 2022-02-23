@@ -7,6 +7,7 @@ class DataUtils():
     def __init__(self, verbose=False):
         # self.data = []
         self.verbose = verbose
+        self.globalRules = []
 
     def count1d(self, r, val):
         return sum(x == val for x in r)
@@ -463,3 +464,101 @@ class DataUtils():
                             val + ' : ' + tree.values[val].attr)
         else:
             print('| ' * level + str(tree.attr))
+
+    # def print_rules(self, tree, level=0):
+    #     rules = []
+    #     for val in tree.values:
+    #         # print(f'val - {val}')
+    #         if not tree.values[val].values:
+    #             #Next is a leaf node
+    #             rule = f'{tree.attr} = {val} => {tree.values[val].attr}'
+    #             # print(f'Last rule: {rule}')
+    #             print(rule)
+    #             print('returning')
+    #             # return rule
+    #         else:
+    #             # rule = f'{tree.attr} = {val} ^' + self.print_rules(tree.values[val])
+    #             print(f'{tree.attr} = {val} ^', end=" ")
+    #             self.print_rules(tree.values[val])
+    
+    def make_rules(self, rule, tree, level=0):
+        for val in tree.values:
+            if not tree.values[val].values:
+                #Next is a leaf node
+                finalRule = f'{tree.attr} = {val} => {tree.values[val].attr}'
+                self.globalRules.append(rule+finalRule)
+            else:
+                newRule = f'{tree.attr} = {val} ^'
+                self.make_rules(rule+newRule, tree.values[val])
+
+
+
+    # def make_rules(self, root):
+    #     TAG = 'MAKE-RULES'
+    #     ruleList = self.make_rule_list([], root)
+    #     print(f'{TAG} ruleList - {ruleList}')
+        # rules = []
+        # for elem in ruleList:
+        #     if elem
+
+
+
+    # def make_rule_list(self, rules, tree, level=0):
+    #     # allRules = []
+    #     # Check if tree is leaf node
+    #     if tree == None:
+    #         return rules
+    #     if tree.attr == 'Yes' or tree.attr == 'No':
+    #         # This is a leaf node
+    #         rules.append("=" + tree.attr)
+    #         print(rules)
+    #         return rules
+
+    #     if level == 0:
+    #         # rules.append(tree.attr)
+    #         for val in tree.values:
+    #             rules.append(val)
+    #             self.make_rule_list(rules, tree.values[val], level+1)
+    #     else:
+    #         for val in tree.values:
+    #             rules.append("^" + val)
+    #             self.make_rule_list(rules, tree.values[val], level+1)
+    #     return rules
+
+    # def make_rule_list(self, rules, tree, level=0):
+    #     # allRules = []
+    #     # Check if tree is leaf node
+    #     if tree == None:
+    #         return rules
+    #     if tree.attr == 'Yes' or tree.attr == 'No':
+    #         # This is a leaf node
+    #         rules.append("=" + tree.attr)
+    #         print(rules)
+    #         return rules
+
+    #     if level == 0:
+    #         rules.append(tree.attr)
+    #         for val in tree.values:
+    #             # rules.append(val)
+    #             self.make_rule_list(rules, tree.values[val], level+1)
+    #     else:
+    #         rules.append("^" + tree.attr)
+    #         for val in tree.values:
+    #             # rules.append("^" + val)
+    #             self.make_rule_list(rules, tree.values[val], level+1)
+    #     return rules
+
+    # def make_rule_list(self, rules, tree, level=0):
+    #     if tree == None:
+    #         return
+    #     if tree.values:
+    #         for i, val in enumerate(tree.values):
+    #             if tree.values[val] is not None:
+    #                 valuesList = list(tree.values[val].values.items())
+    #                 if valuesList:  # Not a leaf node
+    #                     rules.append('^' + str(tree.attr)  + ' = ' + val)
+    #                     self.make_rule_list(rules, tree.values[val], level+1)
+    #                     # self.print_tree(tree.values[val], level+1)
+    #                 else:  # This is a leaf node
+    #                     rules.append('^' + str(tree.attr)  + ' = ' + val + '=>' + tree.values[val].attr)
+    #                     return rules
