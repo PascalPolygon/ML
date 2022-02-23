@@ -1,6 +1,7 @@
 import math
-from multiprocessing.sharedctypes import Value
-from re import T
+import random as random
+# from multiprocessing.sharedctypes import Value
+# from re import T
 
 
 class DataUtils():
@@ -8,6 +9,19 @@ class DataUtils():
         # self.data = []
         self.verbose = verbose
         self.globalRules = []
+
+    def split_data(self, data, trainPercentage):
+        TAG = 'SPLIT-DATA'
+        # print(f'{TAG} split - {trainPercentage}')
+        nTrain = int(len(data)*trainPercentage)
+        # print(f'{TAG} nTrain - {nTrain}')
+        training = data[:nTrain]
+        validation = data[nTrain+1:]
+        # validation = data[:len(data) - nTrain]
+        # training = data[(len(data) - nTrain)+1:]
+        # print(f'{TAG} training ({len(training)})- {training}')
+        # print(f'{TAG} validation ({len(validation)})- {validation}')
+        return training, validation
 
     def count1d(self, r, val):
         return sum(x == val for x in r)
@@ -490,6 +504,29 @@ class DataUtils():
             else:
                 newRule = f'{tree.attr} = {val} ^'
                 self.make_rules(rule+newRule, tree.values[val])
+
+    def corrupt_data(self, examples, targets, percentage):
+        TAG = 'CORRUPT-DATA'
+        maxIter = int(percentage*len(examples))
+        for i in range(maxIter):
+            tempTargets = targets.copy()
+            goodTarget = examples[i][-1]
+            tempTargets.remove(goodTarget)
+            corruptTarget = tempTargets[random.randint(1, len(tempTargets)-1)]
+            examples[i][-1] = corruptTarget
+        # print(f'{TAG} maxIter - {maxIter}')
+        # for i in range(maxIter):
+        #     tempTargets = targets.copy()
+        #     corrupId = random.randint(1, len(examples))
+        #     goodTarget = examples[corrupId-1][-1]
+        #     print(f'Good target : {goodTarget}')
+        #     tempTargets.remove(goodTarget)
+        #     badTargetId = random.randint(1, len(targets))
+        #     badTarget = targets[badTargetId-1]
+        #     print(f'Bad target : {badTarget}')
+        #     examples[corrupId-1][-1] = badTarget
+        return examples
+
 
 
 

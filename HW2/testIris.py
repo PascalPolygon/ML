@@ -98,13 +98,13 @@ if __name__ == '__main__':
 
     # dataUtils.print_tree(root)
     # rules = dataUtils.print_rules('', root)
-    # trainingExamples = load_examples(IRIS_TRAIN_FILE)
-    # testExamples = load_examples(IRIS_TEST_FILE)
-    # attrs, target = load_attributes(IRIS_ATTR_FILE)
+    trainingExamples = load_examples(IRIS_TRAIN_FILE)
+    testExamples = load_examples(IRIS_TEST_FILE)
+    attrs, target = load_attributes(IRIS_ATTR_FILE)
 
-    trainingExamples = load_examples(TENNIS_TRAIN_FILE)
-    attrs, target = load_attributes(TENNIS_ATTR_FILE)
-    testExamples = load_examples(TENNIS_TEST_FILE)
+    # trainingExamples = load_examples(TENNIS_TRAIN_FILE)
+    # attrs, target = load_attributes(TENNIS_ATTR_FILE)
+    # testExamples = load_examples(TENNIS_TEST_FILE)
 
     learner = Learner(target, verbose=False)
     dataUtils = DataUtils()
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     # print(attrs[keyList[0]][0])
     if attrs[keyList[0]][0] == 'continuous':
-        print('Continous data!')
+        # print('Continous data!')
         trainingExamples, validationExamples = dataUtils.split_data(trainingExamples, 0.6666) #keeep ~2/3 of data for training remaining for validation
         # Build tree with continous build_tree function
         labels = dataUtils.get_labels(trainingExamples)

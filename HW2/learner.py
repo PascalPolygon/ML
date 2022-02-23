@@ -104,13 +104,13 @@ class Learner():
         noExamples = dataUtils.get_non_passing_examples(bestAttr, trainingExamples, attrsIndex)
 
         if not yesExamples:
-            mCommonLabel = dataUtils.get_mcommon_label(labels)
+            mCommonLabel = dataUtils.get_mcommon_label(labels, attrNames[targetAttribute])
             root.values['Yes'] = Node(mCommonLabel, None)
         else:
             root.values['Yes'] = self.build_cont_tree(yesExamples, targetAttribute, attrsIndex, attrNames)
         
         if not noExamples:
-            mCommonLabel = dataUtils.get_mcommon_label(labels)
+            mCommonLabel = dataUtils.get_mcommon_label(labels, attrNames[targetAttribute])
             root.values['No'] = Node(mCommonLabel, None)
         else:
             root.values['No'] = self.build_cont_tree(noExamples, targetAttribute, attrsIndex, attrNames)
@@ -157,7 +157,7 @@ class Learner():
                 val, trainingExamples)
             # TODO: Make sure this works for continous values
             if not examplesVal:
-                mCommonLabel = dataUtils.get_mcommon_label(labels)
+                mCommonLabel = dataUtils.get_mcommon_label(labels, attributes[targetAttribute])
                 root.values[val] = Node(mCommonLabel, None)
             else:
                 # Remove the current best attribute because we already used it
@@ -173,6 +173,7 @@ class Learner():
 
     def check_purity(self, labels):
         length = len(labels)
+        # print(labels)
         targetLabel = labels[0]
         labelLen = 0
         for labl in labels:
