@@ -6,17 +6,10 @@ dataUtils = DataUtils()
 class RulesUtils:
     def __init__(self, verbose=False):
         self.verbose = verbose
-        # self.rule_examples = []
-        # self.rule_prediction = None
 
     def test_rule_acc(self, examples, rule, attrsIndex):
         TAG = 'TEST-RULE-ACC'
-        # labels = dataUtils.get_labels(examples)
-        # mCommLabel = dataUtils.get_mcommon_label(labels, uTargets) 
         ruleExamples, prediction = self.get_rule_examples(examples, rule, attrsIndex)
-        # print(f'{TAG} ruleExamples - {ruleExamples}')
-        # print(f'{TAG} rulePrediction - {prediction}')
-        # print(f'{TAG} ruleExamples - {ruleExamples}')
         if ruleExamples:
             nCorrect = 0
             for ruleExample in ruleExamples:
@@ -58,8 +51,6 @@ class RulesUtils:
 
     def prune_rule(self, rule, examples, prevAcc, attrsIndex):
         TAG = 'PRUNE-RULE'
-        # print(f'{TAG} rule - {rule}')
-        # print(f'{TAG} prevAcc - {prevAcc}')
         if prevAcc < 1.0:
             antecedants = rule.split('^')
             if len(antecedants) < 2:
@@ -67,9 +58,6 @@ class RulesUtils:
             antecedantsCopy = antecedants.copy()
             for antecedant in antecedants:
                 del antecedantsCopy[antecedantsCopy.index(antecedant)]
-            # antecedant = antecedants[0]
-            #Remove this antecedant from antecedants (pruning) 
-                # del antecedants[0]
                 newRule = '^'.join(antecedantsCopy) #new rule without pruned antecedant
                 # print(f'{TAG} newRule - {newRule}')
                 newAcc = self.test_rule_acc(examples, newRule, attrsIndex)

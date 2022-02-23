@@ -28,36 +28,6 @@ class Node:
             for v in attrVals:
                 self.values[v] = None
 
-
-# outlookValues = ["sunny", "overcast", "rain"]
-# tempValues = ['hot', 'mild', 'cool']
-# humidityValues = ['high', 'normal']
-# windValues = ['weak', 'strong']
-
-
-# def build_tree():
-#     root = Node("Outlook", outlookValues)
-
-#     root.values['sunny'] = Node("Temperature", tempValues)
-#     root.values['sunny'].values['hot'] = Node("Humidity", humidityValues)
-#     root.values['sunny'].values['hot'].values["high"] = Node(
-#         "Wind", windValues)
-#     root.values['sunny'].values['hot'].values["high"].values["strong"] = Node(
-#         "No", None)
-#     root.values['sunny'].values['hot'].values["high"].values["weak"] = Node(
-#         "Yes", None)
-
-#     root.values['sunny'].values['cool'] = Node("Wind", windValues)
-#     root.values['sunny'].values['cool'].values['weak'] = Node("Yes", None)
-#     root.values['sunny'].values['cool'].values['strong'] = Node("No", None)
-
-#     root.values['overcast'] = Node("No", None)
-#     root.values['rain'] = Node("Yes", None)
-
-#     return root
-
-# Pre-order printing
-
 def load_attributes(file):
     attributes = {}
     targetAttr = ''

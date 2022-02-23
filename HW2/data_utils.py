@@ -199,8 +199,6 @@ class DataUtils():
         TAG = 'FIND-CONT-INFOGAINS'
         #Get attribute ratios: (For each candidate Threshold what is the % of data that passes this threshold)
         attrRatios = self.calculate_cont_attr_ratios(contAttrVals, examples, attrsIndex)
-        # print(f'{TAG} attRatios ({len(attrRatios)}) - {attrRatios}')
-        # print(f'{TAG} contAttrsVals ({len(contAttrVals)}) - ')
         attrTargetRatios = []
         targetAttr = list(attrNames)[-1]
         uTargets = attrNames[targetAttr]
@@ -262,27 +260,13 @@ class DataUtils():
                 # attrVals = attributes[attr]
                 attrTargetRatios = []
                 for attrVal in attributes[attr]:
-                    # print(attrVal)
-                    # print(f'HIGHEST-INFO-GAIN - length of vals: {len(vals)}')
-                    # print(f'HIGHEST-INFO-GAIN - attrVal: {attrVal}')
-                    # For continous values, For each threshold conidition (attrVal) I want a list that will have 3 elements(1/unique target label)
                     if '-gt-' in attrVal:
                         isContData = True
                         anyContAttr = attr
-                        # Continous values. Get teh values for this attrVal
-                        # For continous values, For each threshold conidition (attrVal) I want a list that will have len(uTargets) ratios)
-                        # print(f'{TAG} attrVal - {attrVal}')
-                        # print(f'{TAG} examples - {examples}')
                         _, indices = self.get_passing_cont_values(attrVal, examples, attrsIndex)
                         # self.calculate_cont_target_ratios
                         targetRatios = self.calculate_cont_target_ratios(indices, targets, uTargets)
                         attrTargetRatios.append(targetRatios)
-                        # print(f'{TAG} targetRatios - {attrVal} : {targetRatios}')
-                        # attrValsElems = attrVal.split('-gt-')
-                        # contAttr = attrValsElems[0]
-                        # threshold = attrValsElems[1]
-                        # vals = self.get_attr_values(examples, contAttr, attrsIndex)
-                        # passingContVals, _ = self.get_passing_cont_values(threshold, vals)
                     else: 
                         if attrVal in vals:
                             # TODO: modify to accomodate continous values and thresholds
@@ -341,15 +325,6 @@ class DataUtils():
         TAG = 'FIND-BEST-ATTR'
         inputAttrs = list(attributes)[:-1]
         targetAttr = list(attributes)[-1]
-        # print(f'{TAG} inputAttrs - {inputAttrs}')
-        # vals = self.get_attr_values(
-        #     examples, targetAttr, attrsIndex) #Get values of target attribute
-        # TODO: We don't need entropy to calculate the highest Info gain 
-        # ratios = self.calculate_attr_ratios(
-        #     examples, attributes, targetAttr, attrsIndex, vals) #Ratios of target attribute used to calculate entropy of entire dataset
-        # # print(ratios)
-        # entropy = self.calculate_entropy(ratios) #Calculate the entropy of the entire data
-        #TODO: make sure this can accomodate continuous attributes
         gains, candidateThresholds = self.find_highest_infogain(examples, attributes, labels, attrsIndex)
         # print(f'{TAG} gains - {gains}')
         # print(f'{TAG} candidateThresholds - {candidateThresholds}')
@@ -399,17 +374,6 @@ class DataUtils():
             col.append(float(example[c]))
         return col
 
-    #Duplicates
-    # def find_thresholds(self, vals, labels):
-    #     currentLabel = labels[0]
-    #     thresholds = []
-    #     for i, labl in enumerate(labels):
-    #         if currentLabel != labl: #Adjacent examples with different classfication
-    #             currentLabel = labl
-    #             # print(f'Change between idx {i-1} and {i}')
-    #             thresholds.append((vals[i-1] + vals[i])/2)
-    #     return thresholds
-
     #Less duplicates
     def find_thresholds(self, vals, labels):
         # currentLabel = labels[0]
@@ -447,21 +411,6 @@ class DataUtils():
         return uTargets[maxIdx]
         # print(f'{TAG} label - {len(labels)}')
 
-    # def print_tree(self, tree, level=0):
-    #     if tree == None:
-    #         return
-    #     if tree.values:
-    #         for i, val in enumerate(tree.values):
-    #             if tree.values[val] is not None:
-    #                 valuesList = list(tree.values[val].values.items())
-    #                 if valuesList:  # Not a leaf node
-    #                     print('|\t' * level + str(tree.attr) + ' = ' + val)
-    #                     self.print_tree(tree.values[val], level+1)
-    #                 else:  # This is a leaf node
-    #                     print('|\t' * level + str(tree.attr) + ' = ' +
-    #                         val + ' : ' + tree.values[val].attr)
-    #     else:
-    #         print('|\t' * level + str(tree.attr))
 
     def print_tree(self, tree, level=0):
         if tree == None:
@@ -478,22 +427,6 @@ class DataUtils():
                             val + ' : ' + tree.values[val].attr)
         else:
             print('| ' * level + str(tree.attr))
-
-    # def print_rules(self, tree, level=0):
-    #     rules = []
-    #     for val in tree.values:
-    #         # print(f'val - {val}')
-    #         if not tree.values[val].values:
-    #             #Next is a leaf node
-    #             rule = f'{tree.attr} = {val} => {tree.values[val].attr}'
-    #             # print(f'Last rule: {rule}')
-    #             print(rule)
-    #             print('returning')
-    #             # return rule
-    #         else:
-    #             # rule = f'{tree.attr} = {val} ^' + self.print_rules(tree.values[val])
-    #             print(f'{tree.attr} = {val} ^', end=" ")
-    #             self.print_rules(tree.values[val])
     
     def make_rules(self, rule, tree, level=0):
         for val in tree.values:
@@ -514,88 +447,5 @@ class DataUtils():
             tempTargets.remove(goodTarget)
             corruptTarget = tempTargets[random.randint(1, len(tempTargets)-1)]
             examples[i][-1] = corruptTarget
-        # print(f'{TAG} maxIter - {maxIter}')
-        # for i in range(maxIter):
-        #     tempTargets = targets.copy()
-        #     corrupId = random.randint(1, len(examples))
-        #     goodTarget = examples[corrupId-1][-1]
-        #     print(f'Good target : {goodTarget}')
-        #     tempTargets.remove(goodTarget)
-        #     badTargetId = random.randint(1, len(targets))
-        #     badTarget = targets[badTargetId-1]
-        #     print(f'Bad target : {badTarget}')
-        #     examples[corrupId-1][-1] = badTarget
+
         return examples
-
-
-
-
-    # def make_rules(self, root):
-    #     TAG = 'MAKE-RULES'
-    #     ruleList = self.make_rule_list([], root)
-    #     print(f'{TAG} ruleList - {ruleList}')
-        # rules = []
-        # for elem in ruleList:
-        #     if elem
-
-
-
-    # def make_rule_list(self, rules, tree, level=0):
-    #     # allRules = []
-    #     # Check if tree is leaf node
-    #     if tree == None:
-    #         return rules
-    #     if tree.attr == 'Yes' or tree.attr == 'No':
-    #         # This is a leaf node
-    #         rules.append("=" + tree.attr)
-    #         print(rules)
-    #         return rules
-
-    #     if level == 0:
-    #         # rules.append(tree.attr)
-    #         for val in tree.values:
-    #             rules.append(val)
-    #             self.make_rule_list(rules, tree.values[val], level+1)
-    #     else:
-    #         for val in tree.values:
-    #             rules.append("^" + val)
-    #             self.make_rule_list(rules, tree.values[val], level+1)
-    #     return rules
-
-    # def make_rule_list(self, rules, tree, level=0):
-    #     # allRules = []
-    #     # Check if tree is leaf node
-    #     if tree == None:
-    #         return rules
-    #     if tree.attr == 'Yes' or tree.attr == 'No':
-    #         # This is a leaf node
-    #         rules.append("=" + tree.attr)
-    #         print(rules)
-    #         return rules
-
-    #     if level == 0:
-    #         rules.append(tree.attr)
-    #         for val in tree.values:
-    #             # rules.append(val)
-    #             self.make_rule_list(rules, tree.values[val], level+1)
-    #     else:
-    #         rules.append("^" + tree.attr)
-    #         for val in tree.values:
-    #             # rules.append("^" + val)
-    #             self.make_rule_list(rules, tree.values[val], level+1)
-    #     return rules
-
-    # def make_rule_list(self, rules, tree, level=0):
-    #     if tree == None:
-    #         return
-    #     if tree.values:
-    #         for i, val in enumerate(tree.values):
-    #             if tree.values[val] is not None:
-    #                 valuesList = list(tree.values[val].values.items())
-    #                 if valuesList:  # Not a leaf node
-    #                     rules.append('^' + str(tree.attr)  + ' = ' + val)
-    #                     self.make_rule_list(rules, tree.values[val], level+1)
-    #                     # self.print_tree(tree.values[val], level+1)
-    #                 else:  # This is a leaf node
-    #                     rules.append('^' + str(tree.attr)  + ' = ' + val + '=>' + tree.values[val].attr)
-    #                     return rules

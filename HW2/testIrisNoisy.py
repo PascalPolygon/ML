@@ -28,36 +28,6 @@ class Node:
             for v in attrVals:
                 self.values[v] = None
 
-
-# outlookValues = ["sunny", "overcast", "rain"]
-# tempValues = ['hot', 'mild', 'cool']
-# humidityValues = ['high', 'normal']
-# windValues = ['weak', 'strong']
-
-
-# def build_tree():
-#     root = Node("Outlook", outlookValues)
-
-#     root.values['sunny'] = Node("Temperature", tempValues)
-#     root.values['sunny'].values['hot'] = Node("Humidity", humidityValues)
-#     root.values['sunny'].values['hot'].values["high"] = Node(
-#         "Wind", windValues)
-#     root.values['sunny'].values['hot'].values["high"].values["strong"] = Node(
-#         "No", None)
-#     root.values['sunny'].values['hot'].values["high"].values["weak"] = Node(
-#         "Yes", None)
-
-#     root.values['sunny'].values['cool'] = Node("Wind", windValues)
-#     root.values['sunny'].values['cool'].values['weak'] = Node("Yes", None)
-#     root.values['sunny'].values['cool'].values['strong'] = Node("No", None)
-
-#     root.values['overcast'] = Node("No", None)
-#     root.values['rain'] = Node("Yes", None)
-
-#     return root
-
-# Pre-order printing
-
 def load_attributes(file):
     attributes = {}
     targetAttr = ''
@@ -141,16 +111,8 @@ if __name__ == '__main__':
             
             root = learner.build_cont_tree(trainingExamples, target, attrsIndex, attrs)
             
-            # print(f'{TAG} Learned tree - ')
-            # print('-------------------------')
-            # dataUtils.print_tree(root)
-            # # print(root)
-            # print('-------------------------')
-            # rules = dataUtils.make_rules(root)
             dataUtils.make_rules('', root)
-            # print(dataUtils.globalRules)
-            # for rule in dataUtils.globalRules:
-            #     print(rule)
+            
             trainRuleAccs = []
             testRuleAccs = []
 
@@ -163,10 +125,6 @@ if __name__ == '__main__':
                     continue
                 else:
                     testRuleAccs.append(testAcc)
-                # print(f'{TAG} ruleAcc on train - {trainRuleAcc}')
-                # print(f'{TAG} ruleAcc on test - {testRuleAcc}')
-            # print(f'{TAG} Avg rule acc on train - {sum(trainRuleAccs)/len(trainRuleAccs)}')
-            # print(f'{TAG} Avg rule acc on test - {sum(testRuleAccs)/len(testRuleAccs)}')
 
             trainAcc = testIris.test(trainingExamples, dataUtils.globalRules, attrsIndex)
             testAcc = testIris.test(testExamples, dataUtils.globalRules, attrsIndex)
