@@ -1,3 +1,0 @@
-The decision tree learned in this case was one with the sky attribute at the root, and with sky value ending up as the yes leaf node
-and the rainy value ends up with the N leaf node. This is equivalent to the following general boundary hypothesis from the version space in Figure 2.3: <Sunny,?,?,?,?,?>. This hypothesis will classify on Sunny sampels as positive
-and all non-sunny samples as negative, the decision tree and version space from figure 2.3 therfore both output the same classification on this traning set.
