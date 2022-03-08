@@ -6,9 +6,9 @@ import copy
 
 utils = Utils()
 class Net():
-    def __init__(self, n_neurons, lr=0.01, maxEpoch = 100):
+    def __init__(self, n_neurons, lr=0.01, maxEpoch = 100, verbose=True):
         self.n_neurons = n_neurons
-
+        self.verbose = verbose
         self.eta = lr
         self.maxEpoch = maxEpoch
 
@@ -53,9 +53,10 @@ class Net():
             
             loss = self.loss(outputs, targets)
             self.lossHistory.append(loss)
-            utils.log('epoch', epoch)
-            utils.log('loss', loss)
-            print('----------------------------------')
+            if self.verbose:
+                utils.log('epoch', epoch)
+                utils.log('loss', loss)
+                print('-'*10)
 
     def feedForward(self, inps):
         self.x = []
