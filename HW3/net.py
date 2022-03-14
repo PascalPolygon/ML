@@ -40,19 +40,95 @@ class Net():
                 E += (t_k - o_k)**2
         return E/2
 
-    def train(self, inputs, targets):
+    # def train(self, inputs, targets):
+    #     self.lossHistory = []
+    #     for epoch in range(self.maxEpoch):
+
+    #         outputs = []
+
+    #         for input, target in zip(inputs, targets):
+    #             out = self.feedForward(input)
+    #             outputs.append(out)
+    #             self.backPropagate(target)
+            
+    #         loss = self.loss(outputs, targets)
+    #         self.lossHistory.append(loss)
+    #         if self.verbose:
+    #             utils.log('epoch', epoch)
+    #             utils.log('loss', loss)
+    #             print('-'*10)
+    def tune_weights(self, inputs, targets):
+        outputs = []
+        for input, target in zip(inputs, targets):
+            output = self.feedForward(input)
+            outputs.append(output)
+            self.backPropagate(target)
+
+    def train(self, inputs, targets, validationSet=None, lossThresh=20):
         self.lossHistory = []
+        valInputs = []
+        valTargets = []
+
+        if validationSet is not None:
+            valInputs = validationSet[0]
+            valTargets = validationSet[1]
+        
         for epoch in range(self.maxEpoch):
 
             outputs = []
 
-            for input, target in zip(inputs, targets):
+            # for input, target in zip(inputs, targets):
+            #     out = self.feedForward(input)
+            #     outputs.append(out)
+            #     self.backPropagate(target)
+            self.tune_weights(inputs, targets)
+            for input in inputs:
                 out = self.feedForward(input)
                 outputs.append(out)
-                self.backPropagate(target)
-            
             loss = self.loss(outputs, targets)
             self.lossHistory.append(loss)
+            
+            if valInputs:
+                # self.tune_weights(valInputs, valTargets)
+                valOutputs = []
+                for input in valInputs:
+                    out = self.feedForward(input)
+                    valOutputs.append(out)
+                valLoss = self.loss(valOutputs, valTargets)
+                # utils.log('valLoss current', valLoss)
+                
+
+                if epoch == 0:
+                    bestValLoss = copy.copy(valLoss)
+                    bestWeights = copy.copy(self.w)
+                else:
+                    # caluculate loss with bestWeights
+                    current_weights = copy.copy(self.w)
+                    self.w = copy.copy(bestWeights)
+                    valOutputs = []
+                    for input in valInputs:
+                        out = self.feedForward(input)
+                        valOutputs.append(out)
+                    currentBestValLoss = self.loss(valOutputs, valTargets)
+
+                    self.w = copy.copy(current_weights)
+
+                    utils.log('valLoss', valLoss)
+                    utils.log('bestValLoss', currentBestValLoss)
+
+                    if valLoss < currentBestValLoss: #performance with current training weights is better (keep going)
+                        bestWeights = copy.copy(self.w)
+                        # bestValLoss = valLoss
+                        # utils.log('bestLoss', bestLoss)
+                    elif (valLoss - currentBestValLoss) > lossThresh: #Performance with stored validation weigths is better
+                        utils.log('Interrupting training', None)
+                        utils.log('loss', loss)
+                        utils.log('bestLoss', bestValLoss)
+                        utils.log('epoch', epoch)
+                        #Interrup training here
+                        self.w = copy.copy(bestWeights)
+                        break
+
             if self.verbose:
                 utils.log('epoch', epoch)
                 utils.log('loss', loss)

@@ -6,6 +6,7 @@ from utils import Utils
 import matplotlib.pyplot as plt
 import random
 import argparse
+import math
 
 
 utils = Utils()
@@ -61,11 +62,11 @@ def get_data(path):
 
 def corrupt_data(inputs, outputs, percent):
     nSamples = len(inputs)
-    nCorrupted = int(nSamples*percent)
+    nCorrupted = math.floor(nSamples*percent)-1
     # utils.log('nCorrupted', nCorrupted)
     alreadyCorrupted = []
     while (len(alreadyCorrupted) < nCorrupted): # Randomly select nCcorrupted samples and corrupt them
-        corruptId = random.randint(1, nSamples)
+        corruptId = random.randint(0, nSamples-1)
         if corruptId in alreadyCorrupted:
             continue
 
@@ -79,14 +80,16 @@ def corrupt_data(inputs, outputs, percent):
 def get_validation(inputs, outputs, percent):
     nSamples = len(inputs)
     utils.log('percent', percent)
-    nValidation = int(nSamples*float(percent))
+    # nValidation = int(nSamples*float(percent))
+    nValidation = math.floor(nSamples*float(percent))-1
+    utils.log('nValidation', nValidation)
     valInputs = []
     valOutputs = []
     validationIds = []
 
     while len(validationIds) <= nValidation:
         #Randomly select a row
-        valId = random.randint(1, nSamples)
+        valId = random.randint(0, nSamples-1)
         if valId in validationIds:
             continue
         validationIds.append(valId)
@@ -120,39 +123,80 @@ def arg_parse():
 if __name__ == '__main__':
     opt = arg_parse() # get hyper-parameters
 
-    inputs, outputs = get_data(IRIS_TRAIN_FILE)
-    inputs, outputs = corrupt_data(inputs, outputs, 0.2)
-    valInputs, valOutputs, trainInputs, trainOutputs = get_validation(inputs, outputs, opt.validation)
+    if opt.verbose == 'False':
+        opt.verbose = False
+    elif opt.verbose =='True':
+        opt.verbose = True
 
-    utils.log('len(valInputs)', len(valInputs))
-    utils.log('len(trainInputs)', len(trainInputs))
-    utils.log('len(valOutputs)', len(valOutputs))
-    utils.log('len(trainOutputs)', len(trainOutputs))
-    #Without a validation set
-    # noiseLevel = 0
-    # while (noiseLevel <= 0.2):
-    #     inputs, outputs = get_data(IRIS_TRAIN_FILE)
-    #     inputs, outputs = corrupt_data(inputs, outputs, noiseLevel)
-    #     valInputs, valOutputs, trainInputs, trainOutputs = get_validation(inputs, outputs, opt.validation)
-    #     utils.log('Noise Level', noiseLevel)
+    # inputs, outputs = get_data(IRIS_TRAIN_FILE)
+    # inputs, outputs = corrupt_data(inputs, outputs, 0.2)
+    # valInputs, valOutputs, trainInputs, trainOutputs = get_validation(inputs, outputs, opt.validation)
 
-    #     n_in = len(inputs[0])
-    #     n_out = len(outputs[0])
+    # utils.log('len(valInputs)', len(valInputs))
+    # utils.log('len(trainInputs)', len(trainInputs))
+    # utils.log('len(valOutputs)', len(valOutputs))
+    # utils.log('len(trainOutputs)', len(trainOutputs))
+    # Without a validation set
+    noiseLevel = 0
+    while (noiseLevel <= 0.2):
+        inputs, outputs = get_data(IRIS_TRAIN_FILE)
+        inputs, outputs = corrupt_data(inputs, outputs, noiseLevel)
+        # trainInputs = inputs
+        # trainOutputs = outputs
 
-    #     net = Net([n_in, opt.hidden_units, n_out], lr=opt.max_iter, maxEpoch=opt.max_iter, verbose=opt.verbose) #2 units in input, 3 in hiddel and 1 in output layer
-    #     # utils.log('Training...', None)
-    #     print('Training...')
-    #     net.train(inputs, outputs)
+        # utils.log('trainInputs', trainInputs)
+        # utils.log('trainOutputs', trainOutputs)
+        valInputs, valOutputs, trainInputs, trainOutputs = get_validation(inputs, outputs, opt.validation)
+        # utils.log('len(valInputs)', len(valInputs))
+        # utils.log('len(trainInputs)', len(trainInputs))
+        # utils.log('len(valOutputs)', len(valOutputs))
+        # utils.log('len(trainOutputs)', len(trainOutputs))
+        utils.log('Noise Level', noiseLevel)
 
-    #     # #calculate accuracy
-    #     acc = calculate_accuracy(inputs, outputs)
-    #     utils.log('Train Acc', acc)
-    #     # print('-'*50)
-    #     inputs, outputs = get_data(IRIS_TEST_FILE)
-    #     acc = calculate_accuracy(inputs, outputs)
-    #     utils.log('Test Acc', acc)
+        n_in = len(trainInputs[0])
+        n_out = len(trainOutputs[0])
+        net = Net([n_in, int(opt.hidden_units), n_out], lr=float(opt.lr), maxEpoch=int(opt.max_iter), verbose=bool(opt.verbose)) #2 units in input, 3 in hiddel and 1 in output layer
+        # utils.log('Training...', None)
+        print('Training...')
+        net.train(trainInputs, trainOutputs, validationSet=[valInputs, valOutputs], lossThresh=5)
+        # net.train(trainInputs, trainOutputs)
 
-    #     noiseLevel += 0.02
-    #     print('='*50)
+        # #calculate accuracy
+        acc = calculate_accuracy(trainInputs, trainOutputs)
+        utils.log('Train Acc', acc)
+        # print('-'*50)
+        inputs, outputs = get_data(IRIS_TEST_FILE)
+        acc = calculate_accuracy(inputs, outputs)
+        utils.log('Test Acc', acc)
+
+        noiseLevel += 0.02
+        print('='*50)
+
+# if __name__ == '__main__':
+#     opt = arg_parse() # get hyper-parameters
+#     inputs, outputs = get_data(IRIS_TRAIN_FILE)
+    
+
+#     utils.log('input', inputs)
+#     utils.log('output', outputs)
+
+#     n_in = len(inputs[0])
+#     n_out = len(outputs[0])
+
+#     net = Net([n_in, int(opt.hidden_units), n_out], lr=float(opt.lr), maxEpoch=int(opt.max_iter), verbose=bool(opt.verbose)) #2 units in input, 3 in hiddel and 1 in output layer
+#     net.train(inputs, outputs)
+
+#     plt.plot(net.lossHistory)
+#     plt.show()
+
+#     # #calculate accuracy
+#     acc = calculate_accuracy(inputs, outputs)
+#     utils.log('Train Acc', acc)
+#     print('-'*50)
+#     inputs, outputs = get_data(IRIS_TEST_FILE)
+#     acc = calculate_accuracy(inputs, outputs)
+#     utils.log('Test Acc', acc)
+
+
 
 
