@@ -121,4 +121,4 @@ class Net():
         for j in range(len(self.w)): #Layer
             for k in range(len(self.w[j])): #Unit
                 for i in range(len(self.w[j][k])): #Weight
-                    self.w[j][k][i] += self.eta*deltas[j][k]*self.x[j][i]
+                    self.w[j][k][i] += self.eta*deltas[j][k]*self.x[j][i] #Gradient descent
