@@ -117,6 +117,7 @@ def arg_parse():
     parser.add_argument("--validation", help="percentage of data to keep for validation", default=0)
     parser.add_argument("--custom_arch", help="customer hidden layers architecture", default=[3])
     parser.add_argument("--verbose", help="verbose", default=False)
+    parser.add_argument("--loss_thresh", help="Maximum difference between loss of bestweights vs training weights on validation data", default=0.1)
     return parser.parse_args()
 
 
@@ -141,16 +142,9 @@ if __name__ == '__main__':
     while (noiseLevel <= 0.2):
         inputs, outputs = get_data(IRIS_TRAIN_FILE)
         inputs, outputs = corrupt_data(inputs, outputs, noiseLevel)
-        # trainInputs = inputs
-        # trainOutputs = outputs
-
-        # utils.log('trainInputs', trainInputs)
-        # utils.log('trainOutputs', trainOutputs)
+        
         valInputs, valOutputs, trainInputs, trainOutputs = get_validation(inputs, outputs, opt.validation)
-        # utils.log('len(valInputs)', len(valInputs))
-        # utils.log('len(trainInputs)', len(trainInputs))
-        # utils.log('len(valOutputs)', len(valOutputs))
-        # utils.log('len(trainOutputs)', len(trainOutputs))
+
         utils.log('Noise Level', noiseLevel)
 
         n_in = len(trainInputs[0])
@@ -158,7 +152,7 @@ if __name__ == '__main__':
         net = Net([n_in, int(opt.hidden_units), n_out], lr=float(opt.lr), maxEpoch=int(opt.max_iter), verbose=bool(opt.verbose)) #2 units in input, 3 in hiddel and 1 in output layer
         # utils.log('Training...', None)
         print('Training...')
-        net.train(trainInputs, trainOutputs, validationSet=[valInputs, valOutputs], lossThresh=5)
+        net.train(trainInputs, trainOutputs, validationSet=[valInputs, valOutputs], lossThresh=float(opt.loss_thresh))
         # net.train(trainInputs, trainOutputs)
 
         # #calculate accuracy
@@ -171,31 +165,6 @@ if __name__ == '__main__':
 
         noiseLevel += 0.02
         print('='*50)
-
-# if __name__ == '__main__':
-#     opt = arg_parse() # get hyper-parameters
-#     inputs, outputs = get_data(IRIS_TRAIN_FILE)
-    
-
-#     utils.log('input', inputs)
-#     utils.log('output', outputs)
-
-#     n_in = len(inputs[0])
-#     n_out = len(outputs[0])
-
-#     net = Net([n_in, int(opt.hidden_units), n_out], lr=float(opt.lr), maxEpoch=int(opt.max_iter), verbose=bool(opt.verbose)) #2 units in input, 3 in hiddel and 1 in output layer
-#     net.train(inputs, outputs)
-
-#     plt.plot(net.lossHistory)
-#     plt.show()
-
-#     # #calculate accuracy
-#     acc = calculate_accuracy(inputs, outputs)
-#     utils.log('Train Acc', acc)
-#     print('-'*50)
-#     inputs, outputs = get_data(IRIS_TEST_FILE)
-#     acc = calculate_accuracy(inputs, outputs)
-#     utils.log('Test Acc', acc)
 
 
 
