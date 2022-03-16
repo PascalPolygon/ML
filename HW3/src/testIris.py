@@ -66,7 +66,7 @@ if __name__ == '__main__':
     n_out = len(outputs[0])
     net_arch = [n_in] + hidden_arch + [n_out]
     utils.log('net_arch', net_arch)
-    net = Net(net_arch, lr=float(opt.lr), maxEpoch=int(opt.max_iter), verbose=bool(opt.verbose))
+    net = Net(net_arch, lr=float(opt.lr), maxEpoch=int(opt.max_iter), momentum=float(opt.momentum), verbose=bool(opt.verbose))
     print('Training...')
     net.train(inputs, outputs)
 

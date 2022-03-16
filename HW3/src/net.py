@@ -1,4 +1,3 @@
-import enum
 import random
 from math import e
 from utils import Utils
@@ -6,11 +5,12 @@ import copy
 
 utils = Utils()
 class Net():
-    def __init__(self, n_neurons, lr=0.01, maxEpoch = 100, verbose=True):
+    def __init__(self, n_neurons, lr=0.01, maxEpoch = 100, momentum = 0, verbose=True):
         self.n_neurons = n_neurons
         self.verbose = verbose
         self.eta = lr
         self.maxEpoch = maxEpoch
+        self.alpha = momentum #Momentum hyper parametere
 
         self.w = [] #weights
         self.a = [] #activations (value at unit only for hidden and output)
@@ -20,6 +20,8 @@ class Net():
 
         for i in range(len(n_neurons)-1):
             self.w.append(self.initLayerWeights(n_neurons[i], n_neurons[i+1]))
+        
+        # self.weight_update = copy.copy(self.w)
 
     def initLayerWeights(self, n_in_units, n_out_units):
         layerWeights = []
@@ -39,39 +41,29 @@ class Net():
             for o_k, t_k in zip(output, target):
                 E += (t_k - o_k)**2
         return E/2
-
-    def train(self, inputs, targets):
-        self.lossHistory = []
-        for epoch in range(self.maxEpoch):
-
-            outputs = []
-
-            for input, target in zip(inputs, targets):
-                out = self.feedForward(input)
-                outputs.append(out)
-                self.backPropagate(target)
-            
-            loss = self.loss(outputs, targets)
-            self.lossHistory.append(loss)
-            if self.verbose:
-                utils.log('epoch', epoch)
-                utils.log('loss', loss)
-                print('-'*10)
-                
-    def tune_weights(self, inputs, targets):
-        outputs = []
-        for input, target in zip(inputs, targets):
-            output = self.feedForward(input)
-            outputs.append(output)
-            self.backPropagate(target)
-        return outputs
     
     def train(self, inputs, targets, validationSet=None, lossThresh=5):
+
         self.lossHistory = []
+
         for epoch in range(self.maxEpoch):
+            
+            w_update = [] #Weight update at current iter. Used for adding momentum 
 
             outputs = []
-            outputs = self.tune_weights(inputs, targets)
+            # outputs = self.tune_weights(inputs, targets)
+            for i, (input, target) in enumerate(zip(inputs, targets)):
+                out = self.feedForward(input)
+                outputs.append(out)
+                # w_update.append(self.backPropagate(target))
+                if epoch == 0:
+                    # w_update = self.backPropagate(target, i, 0) #No delta_w(n-1) on first iteration
+                    w_update.append(self.backPropagate(target)) #No delta_w(n-1) on first iteration
+                else:
+                    # w_update = self.backPropagate(target, i, prev_w_update)
+                    w_update.append(self.backPropagate(target, prev_w_update[i])) #previous weight update of this sample
+                    
+            prev_w_update = copy.deepcopy(w_update)
 
             loss = self.loss(outputs, targets)
             self.lossHistory.append(loss)
@@ -90,6 +82,7 @@ class Net():
                 valLoss = self.loss(valOutputs, valTargets)
                 if epoch == 0:
                     bestValLoss = valLoss
+                    bestWeights = copy.copy(self.w)
                 else:
                     if (valLoss - bestValLoss) > lossThresh: #valLoss is greater than bestLoss
                         #Return stored weights and terminate
@@ -137,7 +130,7 @@ class Net():
         
         return self.a[-1] #Only return last layer (outut layer) activation
     
-    def backPropagate(self, target):
+    def backPropagate(self, target, prev_weight_update=[]):
         delta_out = []
         
         out = self.x[-1] #Last units are output
@@ -165,8 +158,15 @@ class Net():
         deltas.reverse() # reverse because you calculated deltas (out -> in), but weights are updated (in->out)
         deltas.append(net_out)
 
-        #Update weights
+        weight_update = copy.deepcopy(self.w)
+
         for j in range(len(self.w)): #Layer
             for k in range(len(self.w[j])): #Unit
                 for i in range(len(self.w[j][k])): #Weight
-                    self.w[j][k][i] += self.eta*deltas[j][k]*self.x[j][i] #Gradient descent
+                    # Calculate weight update
+                    weight_update[j][k][i] = self.eta*deltas[j][k]*self.x[j][i]
+                    #Update weights
+                    if prev_weight_update:
+                        self.w[j][k][i] += weight_update[j][k][i] + self.alpha*prev_weight_update[j][k][i] #Gradient descent w momentum
+                    else:
+                        self.w[j][k][i] += weight_update[j][k][i]
