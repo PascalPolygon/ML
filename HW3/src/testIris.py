@@ -2,8 +2,6 @@ import os
 import inspect
 from net import Net
 from utils import Utils
-import matplotlib.pyplot as plt
-import math
 
 utils = Utils()
 
@@ -70,8 +68,8 @@ if __name__ == '__main__':
     print('Training...')
     net.train(inputs, outputs)
 
-    plt.plot(net.lossHistory)
-    plt.show()
+    # plt.plot(net.lossHistory)
+    # plt.show()
 
     # #calculate accuracy
     acc = calculate_accuracy(inputs, outputs)

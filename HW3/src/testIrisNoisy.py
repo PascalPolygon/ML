@@ -1,9 +1,7 @@
-from email.policy import default
 import os
 import inspect
 from net import Net
 from utils import Utils
-import matplotlib.pyplot as plt
 import random
 import math
 

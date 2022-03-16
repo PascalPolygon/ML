@@ -23,7 +23,7 @@ optional arguments:
 
   python3 testTennis.py --max_iter 10 --lr 5 --hidden_units 4
 
-  python3 testIrisNoisy.py --validation 0.3 --momentum 0.1
+  python3 testIrisNoisy.py --validation 0.3 --momentum 0.1 #Validation 0.3 will use 30% of the data for validation
   
   python3 testIris.py --validation 0.3 --momentum 0.1 --hidden_arch 3-4
 ```
