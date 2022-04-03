@@ -54,7 +54,7 @@ def disp_net_representation(inputs):
         print(')', end=" ")
         print(' -> ',end=" ")
         print(*pred, sep=" ")
-
+        
 if __name__ == '__main__':
     data = utils.load_examples(IDENTITY_TRAIN_FILE)
     opt = utils.arg_parse() # get hyper-parameters
