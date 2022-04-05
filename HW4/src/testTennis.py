@@ -85,15 +85,19 @@ def get_data(path):
 
 if __name__ == "__main__":
     opt = utils.arg_parse() # get hyper-parameters
-    gabil = Gabil(verbose=opt.verbose)
     utils.log('opt', opt)
     # hidden_arch = utils.get_hidden_arch(opt.hidden_arch) #forma user-defined hidden architecture
     
     inputs, outputs = get_data(TENNIS_TRAIN_FILE)
-    q = int(len(inputs)/2) #Max num of hypothesis
+    gabil = Gabil(inputs, outputs, verbose=opt.verbose)
+    # q = int(len(inputs)/2) #Max num of hypothesis
+    q = 7
     utils.log('max_hypothesis', q)
-    p = 2 # 2 rules in first hypothesis, 3 is second
-    gabil.tennis(opt.fitness_thresh, q, p, opt.r, opt.m)
+    # p = 2 # 2 rules in first hypothesis, 3 is second
+    p = 6
+    res = -1
+    while res == -1:
+        res = gabil.tennis(opt.fitness_thresh, q, p, opt.r, opt.m)
 
     # print(inputs)
     # print(outputs)

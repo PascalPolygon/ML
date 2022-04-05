@@ -10,7 +10,7 @@ class Utils:
             data[i] = list(map(float, example))
         return data
         
-    def log(self, name, data):
+    def log(self, name, data=None):
         TAG = inspect.stack()[1][3] #Name of function who called
         print(f'{TAG} {name} - {data}')
 
