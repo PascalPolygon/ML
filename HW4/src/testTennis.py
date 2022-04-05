@@ -94,13 +94,19 @@ if __name__ == "__main__":
     q = 8 # n individual rules
     utils.log('max_hypothesis', q)
     # p = 2 # 2 rules in first hypothesis, 3 is second
-    # p = 5 #nHypothesese
+    p = 5 #nHypothesese
     p = None
 
-    res = -1
-    while res == -1:
-        res = gabil.tennis(float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
-
+    P = -1
+    while P == -1:
+        P = gabil.tennis(float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
+    # utils.log(f'Learned hypotheses {len(P)}')
+    # totalLen = 0
+    # for i, h in enumerate(P):
+    #     utils.log(f'h{i}', h)
+    #     totalLen += len(h)
+    # utils.log('n_rules', totalLen/11)
+    utils.display_rules(P)
     # print(inputs)
     # print(outputs)
     # n_in = len(inputs[0])

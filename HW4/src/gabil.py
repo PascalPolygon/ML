@@ -379,7 +379,8 @@ class Gabil:
             utils.log('FITNESS', fitness)
             n_gen += 1
             # fitnessCopy = copy.deepcopy(fitness)
-        utils.log('FITNESS', fitness)
+        return P
+        # utils.log('FITNESS', fitness)
     
 
             
