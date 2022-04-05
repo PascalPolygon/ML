@@ -30,7 +30,7 @@ class Utils:
         parser.add_argument("--r", help="Replacement rate", default=0.6)
         parser.add_argument("--m", help="Mutation rate", default=0.001)
         parser.add_argument("--fitness_thresh", help="Fitness threshold stopping criterio", default=0.9)
-        parser.add_argument("--num_gen", help="Number of generation  stopping criterion", default=-1)
+        parser.add_argument("--max_gen", help="Number of generation  stopping criterion", default=50)
         parser.add_argument("--sel_strategy", help="Selection strategy", default='fitness-proportional')
         # parser.add_argument("--validation", help="percentage of data to keep for validation", default=0)
         # parser.add_argument("--hidden_arch", help="customer hidden layers architecture. Format: #units-#units-#units (e.g. 1-3-2)", default='3')

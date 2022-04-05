@@ -193,61 +193,6 @@ class Gabil:
                                 break
                 nLoop += 1
             return selected, False
-    
-    # def calculate_d1(self, boundaries, p):
-    #     diffs = []
-    #     for i in range(len(boundaries)):
-    #         if p - boundaries[i] >= 0:
-    #             diffs.append(p-boundaries[i])
-    #     # print(diffs)
-    #     return diffs[-1]
-    # def calculate_d2(self, boundaries, p):
-    #     diffs = []
-    #     for i in range(len(boundaries)):
-    #         if p - boundaries[i] >= 0:
-    #             diffs.append(p-boundaries[i])
-    #     # print(diffs)
-    #     return diffs[-1]
-
-    # def crossover(self, h1, h2, l=5):
-    #     p1 = p2 = 0
-    #     # h2 = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0]+[1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0]
-    #     h1 = [1,0,0,1,1,1,1,1,0,0]
-    #     h2 = [0,1,1,1,0,1,0,0,1,0]
-    #     while not p1 < p2:
-    #         p1 = random.randint(0, len(h1)-2)
-    #         p2 = random.randint(p1, len(h1)-1)
-    #         p1 =0
-    #         p2 = 7
-    #     # rule_boundaries = []
-    #     utils.log('p1', p1)
-    #     utils.log('p2', p2)
-    #     nBoundaries = int(len(h1)/l)
-    #     boundaries = [(i*l)-1 if i > 0 else (i*l) for i in range(nBoundaries)]
-    #     # boundaries[1:] -=1
-    #     utils.log('boundaries h1', boundaries)
-
-    #     d1 = self.calculate_d1(boundaries, p1) #fix this function
-    #     d2 = self.calculate_d2(boundaries, p2)
-    #     utils.log('d1', d1)
-    #     utils.log('d2', d2)
-    #     #parent 2 boundaries
-    #     nBoundaries = int(len(h2)/l)
-    #     boundaries = [(i*l)-1 if i > 0 else (i*l) for i in range(nBoundaries)]
-    #     utils.log('boundaries h2', boundaries)
-    #     p1_list = []
-    #     p2_list = []
-    #     for i in range(len(h2)):
-    #         test_d1 = self.calculate_d1(boundaries, i)
-    #         test_d2 =  self.calculate_d2(boundaries, i)
-    #         # test_d2 = self.calculate_d2(boundaries, i)
-    #         if test_d1 == d1:
-    #             p1_list.append(i)
-    #         if test_d2 == d2:
-    #             p2_list.append(i)
-
-    #     utils.log('p1_list', p1_list)
-    #     utils.log('p2_list', p2_list)
 
     def calculate_d(self, p, h, l):
         nBoundaries = int(len(h)/l)
@@ -264,28 +209,22 @@ class Gabil:
     def crossover(self, h1, h2, l=11):
         p1 = p2 = 0
 
+        # utils.log('Getting the ps...')
         while not p1 < p2:
             p1 = random.randint(0, len(h1)-2)
             p2 = random.randint(p1, len(h1)-1)
-        # h1 = [1,0,0,1,1,1,1,1,0,0]
-        # h2 = [0,1,1,1,0,1,0,0,1,0]
 
-        # p1 = 0
-        # p2 = 7
-        #Crossover points are points following points of intrest
-        # p1 += 1
-        # p2 += 1
-
-        utils.log('h1', h1)
-        utils.log('p1', p1)
-        utils.log('p2', p2)
-
+        # utils.log('h1', h1)
+        # utils.log('p1', p1)
+        # utils.log('p2', p2)
+        # utils.log('Calculating h1 ds...')
         d1 = self.calculate_d(p1, h1, l)
         d2 = self.calculate_d(p2, h1, l)
-        utils.log('d1', d1)
-        utils.log('d2', d2)
+        # utils.log('d1', d1)
+        # utils.log('d2', d2)
         p1_list = []
         p2_list = []
+        # utils.log('Getting h2 ps...')
         for i in range(len(h2)):
             test_d1 = self.calculate_d(i, h2, l)
             test_d2 = self.calculate_d(i, h2, l)
@@ -293,15 +232,19 @@ class Gabil:
                 p1_list.append(i)
             if test_d2 == d2:
                 p2_list.append(i)
-        utils.log('p1_list', p1_list)
-        utils.log('p2_list', p2_list)
-
+        # utils.log('p1_list', p1_list)
+        # utils.log('p2_list', p2_list)
+        # utils.log('Random choice...')
         h2_p2 = h2_p1 = 0 
+        nTrials = 0
         while not h2_p2 > h2_p1:
+            if nTrials > 50:
+                return -1
             h2_p1 = random.choice(p1_list)
             h2_p2 = random.choice(p2_list)
-        utils.log('h2_p1', h2_p1)
-        utils.log('h2_p2', h2_p2)
+            nTrials += 1
+        # utils.log('h2_p1', h2_p1)
+        # utils.log('h2_p2', h2_p2)
 
         #Crossover points are points following points of intrest
         p2 += 1
@@ -311,10 +254,12 @@ class Gabil:
 
         children = []
 
+        # utils.log("Making child 1...[ please don't disturb ;) ]")
         child = copy.deepcopy(h2)
         child[h2_p1:h2_p2]=h1[p1:p2]
         children.append(child)
 
+        # utils.log("Making child 2...[ please don't disturb ;) ]")
         child = copy.deepcopy(h1)
         child[p1:p2]=h2[h2_p1:h2_p2]
         children.append(child)
@@ -322,7 +267,7 @@ class Gabil:
         
 
 
-    def tennis(self, fit_thres, q, p, r, m):
+    def tennis(self, fit_thres, q, p, r, m, max_gen):
         #Generate q random rulues
         #33221
         #Outlook(3), Temperature(3), Humidity(2), Wind(2), PlayTennis(1)
@@ -332,8 +277,9 @@ class Gabil:
         # print('-'*20)
 
         P = self.generate_hypotheses(rules)
-        if len(P) < p:
-            return -1
+        if p is not None:
+            if len(P) < p:
+                return -1
         # p = len(P)
 
         # if self.verbose:
@@ -343,30 +289,41 @@ class Gabil:
         
         # self.evaluate(H[0])
         fitness = []
+        # for h in P:
+        #     nCorrect = self.correct(h)
+        #     # utils.log(f'Hypothesis {h} correct on {nCorrect} examples')
+        #     fitness.append(nCorrect**2)
         for h in P:
             nCorrect = self.correct(h)
-            # utils.log(f'Hypothesis {h} correct on {nCorrect} examples')
             fitness.append(nCorrect**2)
-        
+        fitnessSum = sum(fitness)
+        # fitnessCopy = copy.deepcopy(fitness)
+        n_gen = 0
+        # while max(fitness) < fit_thres or n_gen < max_gen:
         # while max(fitness) < fit_thres:
-        nn = 0
-        while nn < 1:
+        while max(fitness) < fit_thres and n_gen < max_gen:
+            # utils.log('n_gen', n_gen)
+        # nn = 0
+        # while nn < 1:
 
-            nn += 1
+            # nn += 1
             Ps = []
-            fitness = []
+            # fitness = []
             #Probabilistically select (1-r)p members of P 
             p = len(P) #n hypotheses in this population
-            n = math.ceil((1-r)*p)
-            utils.log(f'Keeping {n} hypotheses from {p}')
-            
+            # n = math.ceil((1-r)*p)
+            n = math.floor((1-r)*p)
+            # utils.log(f'Keeping {n} hypotheses from {p}')
+            # utils.log('FITNESS', fitness)
+            fitnessCopy = copy.deepcopy(fitness)
+
             
             #Compute fitness suma
-            for h in P:
-                    nCorrect = self.correct(h)
-                    fitness.append(nCorrect**2)
-            fitnessSum = sum(fitness)
-            fitnessCopy = copy.deepcopy(fitness)
+            # for h in P:
+            #         nCorrect = self.correct(h)
+            #         fitness.append(nCorrect**2)
+            # fitnessSum = sum(fitness)
+            # fitnessCopy = copy.deepcopy(fitness)
 
             if fitnessSum == 0:
                 utils.log('[Bad start!] No good rules, restarting...')
@@ -376,21 +333,53 @@ class Gabil:
             # Ps, err = self.selectEager(n, P, fitnessCopy)
             if err:
                 return -1
-            utils.log(f'New population: {Ps}')
+            # utils.log(f'New population: {Ps}')
 
             n = math.ceil((r*p)/2)
-            utils.log(f'Selecting {n} pairs for crossover from {p}')
+            # utils.log(f'Selecting {n} pairs for crossover from {p}')
             err = True
             fitnessCopy = copy.deepcopy(fitness)
             while err:
                 parents, err = self.selectEager(n*2, P, fitness)
+                # utils.log('Outside select eager')
                 if err:
                     utils.log(f'[ERR] Reselecting cross over pairs')
-            utils.log(f'Pairs: {parents}')
-            
+            # utils.log(f'Pairs: {parents}')
+            # utils.log('Shuffling...')
             random.shuffle(parents)
-            children = self.crossover(parents[0], parents[1])
-            utils.log('Children', children)
+            # utils.log('Crossing over...')
+            for i in range(0, len(parents)-1, 2):
+                children = self.crossover(parents[i], parents[i+1])
+                if children == -1:
+                    utils.log(f'[ERR] Got stuch in random choice')
+                    return -1
+                # utils.log('Children', children)
+                Ps += children
+            # utils.log('New Population', Ps)
+            #mutate
+            n = math.ceil(m*len(Ps))
+            # utils.log(f'Mutate {n} individuals')
+            # utils.log('Mutating..')
+            for i in range(n):
+                m_id = random.randint(0, len(Ps)-1)
+                # utils.log(f'Mutating {m_id}', Ps[m_id])
+                pos = random.randint(0, len(Ps[m_id])-1)
+                # utils.log('bit', pos)
+                Ps[m_id][pos]  = 1 -  Ps[m_id][pos]
+                # utils.log('Mutated   ', Ps[m_id])
+
+            P = copy.deepcopy(Ps)
+
+            #Eval performance
+            fitness = []
+            for h in P:
+                nCorrect = self.correct(h)
+                fitness.append(nCorrect**2)
+            fitnessSum = sum(fitness)
+            utils.log('FITNESS', fitness)
+            n_gen += 1
+            # fitnessCopy = copy.deepcopy(fitness)
+        utils.log('FITNESS', fitness)
     
 
             

@@ -91,13 +91,15 @@ if __name__ == "__main__":
     inputs, outputs = get_data(TENNIS_TRAIN_FILE)
     gabil = Gabil(inputs, outputs, verbose=opt.verbose)
     # q = int(len(inputs)/2) #Max num of hypothesis
-    q = 7
+    q = 8 # n individual rules
     utils.log('max_hypothesis', q)
     # p = 2 # 2 rules in first hypothesis, 3 is second
-    p = 6
+    # p = 5 #nHypothesese
+    p = None
+
     res = -1
     while res == -1:
-        res = gabil.tennis(opt.fitness_thresh, q, p, opt.r, opt.m)
+        res = gabil.tennis(float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
 
     # print(inputs)
     # print(outputs)
