@@ -194,72 +194,133 @@ class Gabil:
                 nLoop += 1
             return selected, False
     
-    def calculate_d1(self, boundaries, p1):
-        for i in range(len(boundaries)-1, -1, -1):
-            # print(i)
-            if p1 > boundaries[i]:
-                d1 = p1 - boundaries[i]
-                return d1
+    # def calculate_d1(self, boundaries, p):
+    #     diffs = []
+    #     for i in range(len(boundaries)):
+    #         if p - boundaries[i] >= 0:
+    #             diffs.append(p-boundaries[i])
+    #     # print(diffs)
+    #     return diffs[-1]
+    # def calculate_d2(self, boundaries, p):
+    #     diffs = []
+    #     for i in range(len(boundaries)):
+    #         if p - boundaries[i] >= 0:
+    #             diffs.append(p-boundaries[i])
+    #     # print(diffs)
+    #     return diffs[-1]
 
-    def calculate_d2(self, boundaries, p2):
-        for i in range(len(boundaries)-1, -1, -1):
-            if boundaries[i] < p2:
-                d2 = p2 - boundaries[i]
-                return d2
+    # def crossover(self, h1, h2, l=5):
+    #     p1 = p2 = 0
+    #     # h2 = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0]+[1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0]
+    #     h1 = [1,0,0,1,1,1,1,1,0,0]
+    #     h2 = [0,1,1,1,0,1,0,0,1,0]
+    #     while not p1 < p2:
+    #         p1 = random.randint(0, len(h1)-2)
+    #         p2 = random.randint(p1, len(h1)-1)
+    #         p1 =0
+    #         p2 = 7
+    #     # rule_boundaries = []
+    #     utils.log('p1', p1)
+    #     utils.log('p2', p2)
+    #     nBoundaries = int(len(h1)/l)
+    #     boundaries = [(i*l)-1 if i > 0 else (i*l) for i in range(nBoundaries)]
+    #     # boundaries[1:] -=1
+    #     utils.log('boundaries h1', boundaries)
 
-    def crossover(self, h1, h2, l=5):
+    #     d1 = self.calculate_d1(boundaries, p1) #fix this function
+    #     d2 = self.calculate_d2(boundaries, p2)
+    #     utils.log('d1', d1)
+    #     utils.log('d2', d2)
+    #     #parent 2 boundaries
+    #     nBoundaries = int(len(h2)/l)
+    #     boundaries = [(i*l)-1 if i > 0 else (i*l) for i in range(nBoundaries)]
+    #     utils.log('boundaries h2', boundaries)
+    #     p1_list = []
+    #     p2_list = []
+    #     for i in range(len(h2)):
+    #         test_d1 = self.calculate_d1(boundaries, i)
+    #         test_d2 =  self.calculate_d2(boundaries, i)
+    #         # test_d2 = self.calculate_d2(boundaries, i)
+    #         if test_d1 == d1:
+    #             p1_list.append(i)
+    #         if test_d2 == d2:
+    #             p2_list.append(i)
+
+    #     utils.log('p1_list', p1_list)
+    #     utils.log('p2_list', p2_list)
+
+    def calculate_d(self, p, h, l):
+        nBoundaries = int(len(h)/l)
+        # boundaries = [(i*l) if i > 0 else (i*l) for i in range(nBoundaries)]
+        boundaries = [(i*l) for i in range(nBoundaries)]
+        # utils.log('boundaries h', boundaries)
+        steps = 0
+        for i in range(p, -1, -1): #Step left throught the bit string until you reach the next boundary (to the left)
+            if i in boundaries:
+                return steps
+            steps += 1
+
+
+    def crossover(self, h1, h2, l=11):
         p1 = p2 = 0
-        # h2 = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0]+[1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0]
-        h1 = [1,0,0,1,1,1,1,1,0,0]
-        h2 = [0,1,1,1,0,1,0,0,1,0]
+
         while not p1 < p2:
             p1 = random.randint(0, len(h1)-2)
             p2 = random.randint(p1, len(h1)-1)
-            p1 =0
-            p2 = 7
-        # rule_boundaries = []
+        # h1 = [1,0,0,1,1,1,1,1,0,0]
+        # h2 = [0,1,1,1,0,1,0,0,1,0]
+
+        # p1 = 0
+        # p2 = 7
+        #Crossover points are points following points of intrest
+        # p1 += 1
+        # p2 += 1
+
+        utils.log('h1', h1)
         utils.log('p1', p1)
         utils.log('p2', p2)
-        nBoundaries = int(len(h1)/l)
-        boundaries = [(i*l)-1 if i > 0 else (i*l) for i in range(nBoundaries)]
-        # boundaries[1:] -=1
-        utils.log('boundaries h1', boundaries)
 
-        # for i in range(len(boundaries)):
-        #     if boundaries[i] > p1:
-        #         d1 = p1 - boundaries[i-1]
-        d1 = self.calculate_d1(boundaries, p1)
-        d2 = self.calculate_d2(boundaries, p2)
-        # for i in range(len(boundaries)-1, -1, -1):
-        #     # print(i)
-        #     if p1 > boundaries[i]:
-        #         d1 = p1 - boundaries[i]
-        #         break
-        # for i in range(len(boundaries)-1, -1, -1):
-        #     if boundaries[i] < p2:
-        #         d2 = p2 - boundaries[i]
-        #         break
+        d1 = self.calculate_d(p1, h1, l)
+        d2 = self.calculate_d(p2, h1, l)
         utils.log('d1', d1)
         utils.log('d2', d2)
-        #parent 2 boundaries
-        nBoundaries = int(len(h2)/l)
-        boundaries = [(i*l)-1 if i > 0 else (i*l) for i in range(nBoundaries)]
-        utils.log('boundaries h2', boundaries)
         p1_list = []
         p2_list = []
         for i in range(len(h2)):
-            test_d1 = self.calculate_d1(boundaries, i)
-            test_d2 = self.calculate_d2(boundaries, i)
+            test_d1 = self.calculate_d(i, h2, l)
+            test_d2 = self.calculate_d(i, h2, l)
             if test_d1 == d1:
                 p1_list.append(i)
             if test_d2 == d2:
                 p2_list.append(i)
-
         utils.log('p1_list', p1_list)
         utils.log('p2_list', p2_list)
 
+        h2_p2 = h2_p1 = 0 
+        while not h2_p2 > h2_p1:
+            h2_p1 = random.choice(p1_list)
+            h2_p2 = random.choice(p2_list)
+        utils.log('h2_p1', h2_p1)
+        utils.log('h2_p2', h2_p2)
 
+        #Crossover points are points following points of intrest
+        p2 += 1
+        p1 += 1
+        h2_p1 += 1
+        h2_p2 += 1
+
+        children = []
+
+        child = copy.deepcopy(h2)
+        child[h2_p1:h2_p2]=h1[p1:p2]
+        children.append(child)
+
+        child = copy.deepcopy(h1)
+        child[p1:p2]=h2[h2_p1:h2_p2]
+        children.append(child)
+        return children
         
+
 
     def tennis(self, fit_thres, q, p, r, m):
         #Generate q random rulues
@@ -298,7 +359,6 @@ class Gabil:
             p = len(P) #n hypotheses in this population
             n = math.ceil((1-r)*p)
             utils.log(f'Keeping {n} hypotheses from {p}')
-          
             
             
             #Compute fitness suma
@@ -329,7 +389,8 @@ class Gabil:
             utils.log(f'Pairs: {parents}')
             
             random.shuffle(parents)
-            offsprings = self.crossover(parents[0], parents[1])
+            children = self.crossover(parents[0], parents[1])
+            utils.log('Children', children)
     
 
             
