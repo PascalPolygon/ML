@@ -7,7 +7,6 @@ TENNIS_TEST_FILE = os.getcwd()+'/../data/tennis-test.txt'
 
 utils = Utils()
 
-
 def process_tennis_data(inputs, outputs):
     for i, input in enumerate(inputs):
         new_input = []

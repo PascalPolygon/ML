@@ -9,6 +9,20 @@ class Utils:
         for i, example in enumerate(data):
             data[i] = list(map(float, example))
         return data
+    
+    def toBin(self, data, scale=1):
+        binData = []
+        for i, example in enumerate(data):
+            binStr = ''
+            for j in range(len(example)):
+                integer =  int(float(example[j])*scale) # convert to scaled int instead (can be rep as 7bit num w no restriction on crossover)
+                binStr += '{0:07b}'.format(integer)
+                # exampleStr += binStr
+            binList = []
+            for k in range(len(binStr)):
+                binList.append(int(binStr[k])) 
+            binData.append(binList)
+        return binData
         
     def log(self, name, data=None):
         TAG = inspect.stack()[1][3] #Name of function who called
@@ -110,13 +124,13 @@ class Utils:
         #     readable_rules.append(readable_rule)
                     # nCorrect += self.test_rule(rule)
                     # rule = []
-    
+
     def arg_parse(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("--p", help="Population size", default=10)
         parser.add_argument("--r", help="Replacement rate", default=0.6)
         parser.add_argument("--m", help="Mutation rate", default=0.001)
-        parser.add_argument("--fitness_thresh", help="Fitness threshold stopping criterio", default=0.9)
+        parser.add_argument("--fitness_thresh", help="Fitness threshold stopping criterio", default=100)
         parser.add_argument("--max_gen", help="Number of generation  stopping criterion", default=50)
         parser.add_argument("--sel_strategy", help="Selection strategy", default='fitness-proportional')
         # parser.add_argument("--validation", help="percentage of data to keep for validation", default=0)

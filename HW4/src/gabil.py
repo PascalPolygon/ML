@@ -14,12 +14,26 @@ class Gabil:
         self.targets = targets
         self.verbose=verbose
     
-    def generate_tennis_rule(self):
+    # def generate_tennis_rule(self):
+    #     rule = []
+    #     for _ in range(11):
+    #         rule.append(1 if random.random() > 0.5 else 0)
+    #     # if self.verbose:
+    #     #     utils.log('Random rule', rule)
+    #     return rule 
+    
+    # def generate_iris_rule(self):
+    #     rule = []
+    #     for _ in range(28*2+1):
+    #         rule.append(1 if random.random() > 0.5 else 0)
+    #     # if self.verbose:
+    #     #     utils.log('Random rule', rule)
+    #     return rule 
+    
+    def generate_rule(self, l):
         rule = []
-        for _ in range(11):
+        for _ in range(l):
             rule.append(1 if random.random() > 0.5 else 0)
-        # if self.verbose:
-        #     utils.log('Random rule', rule)
         return rule 
 
     def match_substring(self, example_substring, rule_substring):
@@ -41,7 +55,7 @@ class Gabil:
             return 0
         # print('-'*20)
 
-    def test_rule(self, rule):
+    def test_tennis_rule(self, rule):
         nCorrect = 0
         for input, target in zip(self.inputs, self.targets):
             outlook_example = input[:3]
@@ -73,20 +87,82 @@ class Gabil:
                     #     utils.log(f'Rule {rule} classifies examples {input+target}')
         return nCorrect
 
-    
-        #Match temperature
-        #Match humidity
-        #Match wind
-        #Match playtennis
+    def test_iris_rule(self, rule, inputs, targets):
+        nCorrect = 0
+        nAttrs = 4
+        for input, target in zip(inputs, targets):
+            index = 0
+            num_index = 0
+            nAttrMatch = 0
+            for i in range(nAttrs):
+                num = ''
+                min_ = ''
+                max_ = ''
 
-    def correct(self, h):
+                min_list_start = index
+                min_list_end = index+7
+
+                max_list_start = min_list_end
+                max_list_end = max_list_start + 7
+
+                index = max_list_end
+
+                num_start = num_index
+                num_end = num_start + 7
+                num_index = num_end
+
+                min_list = rule[min_list_start:min_list_end]
+                max_list = rule[max_list_start:max_list_end]
+                num_list = input[num_start:num_end]
+
+                for i in range(len(min_list)):
+                    min_ +=  str(min_list[i])
+
+                for i in range(len(max_list)):
+                    max_ += str(max_list[i])
+                
+                for i in range(len(num_list)):
+                    num += str(num_list[i])
+
+                # print(f'{min_} | {num} | {max_}')
+                min_  = int(min_, 2)
+                num  = int(num, 2)
+                max_  = int(max_, 2)
+                # print(f'{min_} | {num} | {max_}')
+                if min_ < num and max_ > num:
+                    nAttrMatch += 1
+            pred = rule[-3:]
+
+            if nAttrMatch == nAttrs:
+                #Check that classifications match
+                if pred == target:
+                    nCorrect += 1
+
+        return nCorrect
+
+    def correct_tennis(self, h):
         #Extract individual rules from hypothesis
         rule = []
         nCorrect = 0 #n examples correctly classified by this hypothesis
         for bit in h:
             rule.append(bit)
             if len(rule) == 11:
-                nCorrect += self.test_rule(rule)
+                nCorrect += self.test_tennis_rule(rule)
+                rule = []
+        return nCorrect
+
+    def correct_iris(self, h, inputs=None, targets=None):
+
+        if inputs is None:
+            inputs = copy.deepcopy(self.inputs)
+            targets = copy.deepcopy(self.targets)
+        #Extract individual rules from hypothesis
+        rule = []
+        nCorrect = 0 #n examples correctly classified by this hypothesis
+        for bit in h:
+            rule.append(bit)
+            if len(rule) == (28*2+3):
+                nCorrect += self.test_iris_rule(rule, inputs, targets)
                 rule = []
         return nCorrect
 
@@ -150,6 +226,82 @@ class Gabil:
                             break
                 nLoop += 1
             return selected, False
+    
+    # def rankSelect(self, n, P, fitnessCopy):
+
+
+    def tournamentSelect(self, n, P, fitnessCopy, pr=0.7):
+        nLoop = 0
+        selected = []
+        selected_ids = []
+        # utils.log('Tournament selecting...')
+
+        while len(selected) < n:
+            if nLoop == 70:
+                utils.log('[Bad start!] Likely due to not enough fit individuals, restarting...')
+                return None, True
+            
+            fitnessSum = sum(fitnessCopy)
+
+            #Randomly select individuals if there are no fit ones left
+            if fitnessSum == 0:
+                #Select a hypothesis at random
+                random_selectable = []
+                for i in range(len(fitnessCopy)):
+                    if not i in selected_ids:
+                        random_selectable.append(i)
+                random_select = random.choice(random_selectable)
+                # utils.log(f'Randomly selected h[{random_select}]')
+                selected_ids.append(random_select)
+                selected.append(P[random_select])
+                if len(selected) == n:
+                        break
+            else:
+                #Select 2 at random
+                nn = len(P)
+                i1 = random.randint(0, nn-1)
+                i2 = random.randint(0, nn-1)
+                # utils.log('Picking i1, i2')
+                # while i1 in selectedIndices or i2 in selectedIndices:
+                #     i1 = random.randint(0, n-1)
+                #     i2 = random.randint(0, n-1)
+                # print('Picking i1, i2')
+                while fitnessCopy[i1] == 0 and fitnessCopy[i2] == 0:
+                    i1 = random.randint(0, nn-1)
+                    i2 = random.randint(0, nn-1)
+                # print('i1, i2, picked!')
+                # #Do not reuse already selected ones    
+                # fitnessCopy[i1] = 0
+                # fitnessCopy[i2] = 0
+                h = [P[i1], P[i2]]
+                # h1 = P[i1]
+                # h2 = P[i2]
+                #fitness
+                # f = [(self.correct_iris(h[0]))**2, (self.correct_iris(h[1]))**2]
+                f = [fitnessCopy[i1], fitnessCopy[i2]]
+                iMax = f.index(max(f))
+                if random.random() <= pr:
+                    idx = iMax
+                    # selectedIndices.append(idx)
+                    selected.append(h[idx])
+                else:
+                    idx = int(1-iMax)
+                    # selectedIndices.append(idx)
+                    selected.append(h[idx])
+                
+                # utils.log('len selected', len(selected))
+
+                #Set fitness of used hypothesis to low score so we don't reuse it
+                if idx == 0:
+                    fitnessCopy[i1] = 0
+                else:
+                    fitnessCopy[i2] = 0
+
+                if len(selected) >= n:
+                    break
+            
+            nLoop += 1
+        return selected, False
 
     def selectEager(self, n, P, fitnessCopy):
             nLoop = 0
@@ -170,7 +322,7 @@ class Gabil:
                         if not i in selected_ids:
                             random_selectable.append(i)
                     random_select = random.choice(random_selectable)
-                    utils.log(f'Randomly selected h[{random_select}]')
+                    # utils.log(f'Randomly selected h[{random_select}]')
                     selected_ids.append(random_select)
                     selected.append(P[random_select])
                     if len(selected) == n:
@@ -264,8 +416,168 @@ class Gabil:
         child[p1:p2]=h2[h2_p1:h2_p2]
         children.append(child)
         return children
-        
+    
 
+    def irisSelection(self, fit_thresh, q, p, r, m, max_gen):
+        rules = []
+        for _ in range(q):
+            rules.append(self.generate_rule((28*2)+3))
+        utils.log('Generating population...')
+        P = self.generate_hypotheses(rules)
+
+        if p is not None:
+            if len(P) < p:
+                return -1
+        
+        fitness = []
+
+        for h in P:
+            nCorrect = self.correct_iris(h)
+            fitness.append(nCorrect**2)
+        fitnessSum = sum(fitness)
+        utils.log(f'FITNESS {len(fitness)}', fitness)
+        n_gen = 0
+
+        utils.log('Starting evolution...')
+        while max(fitness) < fit_thresh and n_gen < max_gen:
+            Ps = []
+            p = len(P) #n hypotheses in this population
+
+            n = math.floor((1-r)*p)
+
+            fitnessCopy = copy.deepcopy(fitness)
+
+            if fitnessSum == 0:
+                utils.log('[Bad start!] No good rules, restarting...')
+                return -1 
+
+            # Ps, err = self.selectEager(n, P, fitnessCopy)
+            # utils.log('n to keep', n)
+            Ps, err = self.tournamentSelect(n, P, fitnessCopy, pr=0.8)
+            # utils.log('P size after selection', len(Ps))
+
+            if err:
+                return -1
+            
+            n = math.ceil((r*p)/2)
+            # utils.log('n babies', n*2)
+            err = True
+            # fitnessCopy = copy.deepcopy(fitness)
+            # print('Selecting parents..')
+            while err:
+                # parents, err = self.selectEager(n*2, P, fitness)
+                parents, err = self.tournamentSelect(n*2, P, fitnessCopy, pr=0.8)
+                if err:
+                    utils.log(f'[ERR] Reselecting cross over pairs')
+
+            # print('Crossing over...')
+            random.shuffle(parents)
+            for i in range(0, len(parents)-1, 2):
+                children = self.crossover(parents[i], parents[i+1], l=((28*2)+3))
+                # utils.log('n produced children', len(children))
+                if children == -1:
+                    utils.log(f'[ERR] Got stuck in random choice')
+                    return -1
+                Ps += children
+            # utils.log('P size after crossover', len(Ps))
+            n = math.ceil(m*len(Ps)) #mutate
+            for i in range(n):
+                m_id = random.randint(0, len(Ps)-1)
+                pos = random.randint(0, len(Ps[m_id])-1)
+                Ps[m_id][pos]  = 1 -  Ps[m_id][pos]
+
+            P = copy.deepcopy(Ps)
+            # utils.log('New P size', len(P))
+            fitness = []
+            for h in P:
+                nCorrect = self.correct_iris(h)
+                fitness.append(nCorrect**2)
+            fitnessSum = sum(fitness)
+            utils.log(f'Generation', n_gen)
+            utils.log(f'FITNESS {len(fitness)}', fitness)
+            n_gen += 1
+        return P
+
+    def iris(self, fit_thresh, q, p, r, m, max_gen):
+        rules = []
+        for _ in range(q):
+            rules.append(self.generate_rule((28*2)+3))
+        utils.log('Generating population...')
+        P = self.generate_hypotheses(rules)
+
+        # utils.log('len(P)', len(P))
+        if p is not None:
+            if len(P) < p:
+                return -1
+        
+        fitness = []
+
+        for h in P:
+            nCorrect = self.correct_iris(h)
+            fitness.append(nCorrect**2)
+        fitnessSum = sum(fitness)
+        # utils.log(f'fitness {len(fitness)}', fitness)
+        n_gen = 0
+
+        utils.log('Starting evolution...')
+        while max(fitness) < fit_thresh and n_gen < max_gen:
+            Ps = []
+            p = len(P) #n hypotheses in this population
+            # utils.log(f'len(P)', p)
+            n = math.floor((1-r)*p)
+            # utils.log('n to keep', n)
+
+            fitnessCopy = copy.deepcopy(fitness)
+
+            if fitnessSum == 0:
+                utils.log('[Bad start!] No good rules, restarting...')
+                return -1 
+            
+            # print('Selecting next gen...')
+            # Ps, err = self.select(n, P, fitnessCopy, fitnessSum)
+            Ps, err = self.selectEager(n, P, fitnessCopy)
+
+            if err:
+                return -1
+
+            # print('Selected')
+            
+
+            n = math.ceil((r*p)/2)
+            # utils.log('n babies', n*2)
+            err = True
+            fitnessCopy = copy.deepcopy(fitness)
+            # print('Selecting parents..')
+            while err:
+                parents, err = self.selectEager(n*2, P, fitness)
+                if err:
+                    utils.log(f'[ERR] Reselecting cross over pairs')
+
+            # print('Crossing over...')
+            random.shuffle(parents)
+            for i in range(0, len(parents)-1, 2):
+                children = self.crossover(parents[i], parents[i+1], l=((28*2)+3))
+                if children == -1:
+                    utils.log(f'[ERR] Got stuch in random choice')
+                    return -1
+                Ps += children
+            n = math.ceil(m*len(Ps)) #mutate
+            for i in range(n):
+                m_id = random.randint(0, len(Ps)-1)
+                pos = random.randint(0, len(Ps[m_id])-1)
+                Ps[m_id][pos]  = 1 -  Ps[m_id][pos]
+
+            P = copy.deepcopy(Ps)
+            # utils.log('New P size', len(P))
+            fitness = []
+            for h in P:
+                nCorrect = self.correct_iris(h)
+                fitness.append(nCorrect**2)
+            fitnessSum = sum(fitness)
+            utils.log(f'Generation', n_gen)
+            utils.log(f'FITNESS {len(fitness)}', fitness)
+            n_gen += 1
+        return P
 
     def tennis(self, fit_thres, q, p, r, m, max_gen):
         #Generate q random rulues
@@ -273,7 +585,7 @@ class Gabil:
         #Outlook(3), Temperature(3), Humidity(2), Wind(2), PlayTennis(1)
         rules = []
         for _ in range(q):
-            rules.append(self.generate_tennis_rule())
+            rules.append(self.generate_rule(11))
         # print('-'*20)
 
         P = self.generate_hypotheses(rules)
@@ -294,7 +606,7 @@ class Gabil:
         #     # utils.log(f'Hypothesis {h} correct on {nCorrect} examples')
         #     fitness.append(nCorrect**2)
         for h in P:
-            nCorrect = self.correct(h)
+            nCorrect = self.correct_tennis(h)
             fitness.append(nCorrect**2)
         fitnessSum = sum(fitness)
         # fitnessCopy = copy.deepcopy(fitness)
@@ -373,7 +685,7 @@ class Gabil:
             #Eval performance
             fitness = []
             for h in P:
-                nCorrect = self.correct(h)
+                nCorrect = self.correct_tennis(h)
                 fitness.append(nCorrect**2)
             fitnessSum = sum(fitness)
             utils.log('FITNESS', fitness)
