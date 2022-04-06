@@ -44,6 +44,8 @@ class Utils:
         outlook_readable_rule = 'Outlook = '
         if sum(outlook_rule) == 3:
             outlook_readable_rule += 'Any '
+        elif sum(outlook_rule) == 0:
+            outlook_readable_rule += 'None '
         else:
             if outlook_rule[0] == 1:
                 outlook_readable_rule += 'Sunny'
@@ -51,17 +53,19 @@ class Utils:
                 if  outlook_readable_rule == 'Outlook = ':
                     outlook_readable_rule += ' Overcast'
                 else:
-                    outlook_readable_rule += 'V Overcast'
+                    outlook_readable_rule += ' V Overcast'
             if outlook_rule[2] == 1:
                 if  outlook_readable_rule == 'Outlook = ':
                     outlook_readable_rule += ' Rain'
                 else:
-                    outlook_readable_rule += 'V Rain'
+                    outlook_readable_rule += ' V Rain'
 
         temp_rule = rule[3:6]
         temp_readable_rule = 'Temp = '
         if sum(temp_rule) == 3:
             temp_readable_rule += 'Any '
+        elif sum(temp_rule) == 0:
+            temp_readable_rule += 'None '
         else:
             if temp_rule[0] == 1:
                 temp_readable_rule += 'Hot'
@@ -69,18 +73,20 @@ class Utils:
                 if  temp_readable_rule == 'Temp = ':
                     temp_readable_rule += ' Mild'
                 else:
-                    temp_readable_rule += 'V Mild'
+                    temp_readable_rule += ' V Mild'
             if temp_rule[2] == 1:
                 if  temp_readable_rule == 'Temp = ':
                     temp_readable_rule += ' Cool'
                 else:
-                    temp_readable_rule += 'V Cool'
+                    temp_readable_rule += ' V Cool'
 
 
         hum_rule = rule[6:8]
         hum_readable_rule = 'Hum = '
         if sum(hum_rule) == 2:
             hum_readable_rule += 'Any '
+        elif sum(hum_rule) == 0:
+            hum_readable_rule += 'None '
         else:
             if hum_rule[0] == 1:
                 hum_readable_rule += 'High'
@@ -95,6 +101,8 @@ class Utils:
         wind_readable_rule = 'Wind = '
         if sum(wind_rule) == 2:
             wind_readable_rule += 'Any '
+        elif sum(wind_rule) == 0:
+            wind_readable_rule += 'None '
         else:
             if wind_rule[0] == 1:
                 wind_readable_rule += 'Weak'
@@ -110,10 +118,25 @@ class Utils:
         readable_rule = '('+ outlook_readable_rule+') ^ ('+ temp_readable_rule + ') ^ (' + hum_readable_rule + ') ^ (' + wind_readable_rule + ') ^ (' + pred_readable_rule + ')' 
         return readable_rule
 
-    def display_rules(self, P):
+    def display_tennis_rules(self, P):
         readable_rules = []
-        rule = [0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0]
-        print(self.make_readable(rule))
+        # rule = [0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0]
+        for h in P:
+            rule = []
+            # readable_rule = []
+            hypo_rules = []
+            for bit in h:
+                rule.append(bit)
+                if len(rule) == 11:
+                    aRule = self.make_readable(rule)
+                    # print(aRule)
+                    hypo_rules.append(aRule)
+                    rule = []
+            readable_rules.append(hypo_rules)
+            hypo_rules = []
+        return readable_rules
+                
+        # print(self.make_readable(rule))
         # for h in P:
         #     rule = []
         #     readable_rule = []
@@ -127,10 +150,10 @@ class Utils:
 
     def arg_parse(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--p", help="Population size", default=10)
+        parser.add_argument("--q", help="Number of individual rules", default=500)
         parser.add_argument("--r", help="Replacement rate", default=0.6)
         parser.add_argument("--m", help="Mutation rate", default=0.001)
-        parser.add_argument("--fitness_thresh", help="Fitness threshold stopping criterio", default=100)
+        parser.add_argument("--fitness_thresh", help="Fitness threshold stopping criterio", default=None)
         parser.add_argument("--max_gen", help="Number of generation  stopping criterion", default=50)
         parser.add_argument("--sel_strategy", help="Selection strategy", default='fitness-proportional')
         # parser.add_argument("--validation", help="percentage of data to keep for validation", default=0)
@@ -144,4 +167,6 @@ class Utils:
         elif opt.verbose =='True':
             opt.verbose = True
 
+        if opt.fitness_thresh == 'None':
+            opt.fitness_thresh == None
         return opt

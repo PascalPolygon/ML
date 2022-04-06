@@ -48,19 +48,66 @@ if __name__ == '__main__':
     # print(testInputs)
     gabil = Gabil(inputs, targets, verbose=opt.verbose)
 
-    # q = 1000 # n individual rules
-    q = 1000
-    # p = 10 #nHypothesese
     p = None
 
+    results = []
+    print('='*50)
     P = -1
-    # while P == -1:
-    #     executor = ThreadPoolExecutor(max_workers=50)
-    #     future = executor.submit(gabil.irisSelection, float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
-    #     P = future.result()
+    utils.log('USING FITNESS_PROPORTIONAL')
     while P == -1:
-        P = gabil.irisSelection(float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
+        if opt.fitness_thresh is not None:
+            P = gabil.irisSelection(float(opt.fitness_thresh), int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'fitness_proportional')
+        else:
+            P = gabil.irisSelection(None, int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'fitness_proportional')
     acc = evaluate(P, inputs, targets)
+    results.append(acc)
     utils.log('train acc', acc)
     acc = evaluate(P, testInputs, testTargets)
+    results.append(acc)
     utils.log('test acc', acc)
+    
+    print('='*50)
+    P = -1
+    utils.log('USING TOURNAMENT_SELECTION')
+    while P == -1:
+        if opt.fitness_thresh is not None:
+            P = gabil.irisSelection(float(opt.fitness_thresh), int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'tournament')
+        else:
+            P = gabil.irisSelection(None, int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'tournament')
+    acc = evaluate(P, inputs, targets)
+    results.append(acc)
+    utils.log('train acc', acc)
+    acc = evaluate(P, testInputs, testTargets)
+    results.append(acc)
+    utils.log('test acc', acc)
+
+
+    print('='*50)
+    P = -1
+    utils.log('USING RANK_SELECTION')
+    while P == -1:
+        if opt.fitness_thresh is not None:
+            P = gabil.irisSelection(float(opt.fitness_thresh), int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'rank')
+        else:
+            P = gabil.irisSelection(None, int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'rank')
+    acc = evaluate(P, inputs, targets)
+    results.append(acc)
+    utils.log('train acc', acc)
+    acc = evaluate(P, testInputs, testTargets)
+    results.append(acc)
+    utils.log('test acc', acc)
+
+    # print('='*54)
+    # print('='*50)
+    # print('                           train acc       |      test acc')
+    # print(f'FITNESS_PROPORTIONAL | {results[0]*100} % | {results[1]*100} %')
+    # print(f'TOURNAMENT_SELECTION | {results[2]*100} % | {results[3]*100} %')
+    # print(f'FITNESS_PROPORTIONAL | {results[4]*100} % | {results[5]*100} %')
+
+    # results = [0.9,0.5,0.3,0.2,0.4,0.4]
+    print('-'*54)
+    print('                           | train acc      | test acc')
+    print('-'*54)
+    print(f'FITNESS_PROPORTIONAL       | {results[0]*100} %          | {results[1]*100} %')
+    print(f'TOURNAMENT_SELECTION       | {results[2]*100} %          | {results[3]*100} %')
+    print(f'FITNESS_PROPORTIONAL       | {results[4]*100} %          | {results[5]*100} %')

@@ -55,9 +55,9 @@ class Gabil:
             return 0
         # print('-'*20)
 
-    def test_tennis_rule(self, rule):
+    def test_tennis_rule(self, rule, inputs, targets):
         nCorrect = 0
-        for input, target in zip(self.inputs, self.targets):
+        for input, target in zip(inputs, targets):
             outlook_example = input[:3]
             outlook_rule = rule[:3]
 
@@ -140,14 +140,17 @@ class Gabil:
 
         return nCorrect
 
-    def correct_tennis(self, h):
+    def correct_tennis(self, h, inputs=None, targets=None):
+        if inputs is None:
+            inputs = copy.deepcopy(self.inputs)
+            targets = copy.deepcopy(self.targets)
         #Extract individual rules from hypothesis
         rule = []
         nCorrect = 0 #n examples correctly classified by this hypothesis
         for bit in h:
             rule.append(bit)
             if len(rule) == 11:
-                nCorrect += self.test_tennis_rule(rule)
+                nCorrect += self.test_tennis_rule(rule, inputs, targets)
                 rule = []
         return nCorrect
 
@@ -417,8 +420,62 @@ class Gabil:
         children.append(child)
         return children
     
+    def rankSelect(self, n, P, fitnessCopy):
+        selected = []
+        selected_ids = []
+        # utils.log('Selecting...')
+        # rankedP = copy.deepcopy(P)
+        while len(selected) < n:
 
-    def irisSelection(self, fit_thresh, q, p, r, m, max_gen):
+            fitnessSum = sum(fitnessCopy)
+
+            if fitnessSum == 0:
+                #Select a hypothesis at random
+                random_selectable = []
+                for i in range(len(fitnessCopy)):
+                    if not i in selected_ids:
+                        random_selectable.append(i)
+                random_select = random.choice(random_selectable)
+                # utils.log(f'Randomly selected h[{random_select}]')
+                selected_ids.append(random_select)
+                selected.append(P[random_select])
+                if len(selected) == n:
+                        break
+            else:
+                # fitnessCopy.sort()
+                
+                rankedP = [x for _,x in sorted(zip(fitnessCopy,P))]
+
+                # for h in rankedP:
+                #     utils.log(f'ranked hypo fitness', self.correct_iris(h)**2)
+                # utils.log('sorted fitnessCopy', fitnessCopy)
+
+                # rankedFitness = copy.deepcopy(fitnessCopy)
+                # rankedFitness.sort()
+                #We want desceding order
+                # rankedFitness.reverse()
+                rankedP.reverse()
+
+                # utils.log('sorted fitness', rankedFitness)
+                nn = len(rankedP)-1
+
+                for i, h, in enumerate(rankedP):
+                    selectProb = (nn-i)/nn
+                    # utils.log(f'select prob at index {i}', selectProb)
+                    if random.random() <= selectProb:
+                        selected.append(h)
+                        # utils.log(f'selected hypo at index {i} w fitness', (self.correct_iris(h)**2))
+                        fitnessCopy[i] = 0 #do not reuse hypotheses
+                        if len(selected)  == n:
+                            break
+                P = copy.deepcopy(rankedP)
+        
+        return selected, False
+
+
+        
+
+    def irisSelection(self, fit_thresh, q, p, r, m, max_gen, sel_strategy):
         rules = []
         for _ in range(q):
             rules.append(self.generate_rule((28*2)+3))
@@ -439,7 +496,12 @@ class Gabil:
         n_gen = 0
 
         utils.log('Starting evolution...')
-        while max(fitness) < fit_thresh and n_gen < max_gen:
+        
+        while n_gen < max_gen:
+            if fit_thresh is not None:
+                if max(fitness) >= fit_thresh:
+                    utils.log('Max fitness reached!')
+                    break
             Ps = []
             p = len(P) #n hypotheses in this population
 
@@ -453,7 +515,12 @@ class Gabil:
 
             # Ps, err = self.selectEager(n, P, fitnessCopy)
             # utils.log('n to keep', n)
-            Ps, err = self.tournamentSelect(n, P, fitnessCopy, pr=0.8)
+            if sel_strategy == 'fitness_proportional':
+                Ps, err = self.selectEager(n, P, fitnessCopy)
+            elif sel_strategy == 'tournament':
+                Ps, err = self.tournamentSelect(n, P, fitnessCopy, pr=0.8)
+            elif sel_strategy == 'rank':
+                Ps, err = self.rankSelect(n, P, fitnessCopy)
             # utils.log('P size after selection', len(Ps))
 
             if err:
@@ -465,8 +532,12 @@ class Gabil:
             # fitnessCopy = copy.deepcopy(fitness)
             # print('Selecting parents..')
             while err:
-                # parents, err = self.selectEager(n*2, P, fitness)
-                parents, err = self.tournamentSelect(n*2, P, fitnessCopy, pr=0.8)
+                if sel_strategy == 'fitness_proportional':
+                    parents, err = self.selectEager(n*2, P, fitnessCopy)
+                elif sel_strategy == 'tournament':
+                    parents, err = self.tournamentSelect(n*2, P, fitnessCopy, pr=0.8)
+                elif sel_strategy == 'rank':
+                    parents, err = self.rankSelect(n*2, P, fitnessCopy)
                 if err:
                     utils.log(f'[ERR] Reselecting cross over pairs')
 
