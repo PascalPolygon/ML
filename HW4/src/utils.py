@@ -1,6 +1,6 @@
 import inspect
 import argparse
-
+import random
 class Utils:
     def __init__(self):
         self.data = []
@@ -118,6 +118,60 @@ class Utils:
         readable_rule = '('+ outlook_readable_rule+') ^ ('+ temp_readable_rule + ') ^ (' + hum_readable_rule + ') ^ (' + wind_readable_rule + ') ^ (' + pred_readable_rule + ')' 
         return readable_rule
 
+    def make_iris_readable(self, rule):
+        #make a radom rule for testing
+        # rule = []
+        # for i in range((28*2)+3):
+        #     rule.append(random.randint(0,1))
+        # print(rule)
+        
+        nAttrs = 4
+        attrs = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width']
+        index = 0
+        ruleStr = ''
+        for j in range(nAttrs):
+            min_ = ''
+            max_ = ''
+
+            min_list_start = index
+            min_list_end = index+7
+
+            max_list_start = min_list_end
+            max_list_end = max_list_start + 7
+
+            index = max_list_end
+
+            min_list = rule[min_list_start:min_list_end]
+            max_list = rule[max_list_start:max_list_end]
+
+            for i in range(len(min_list)):
+                # print(min_list[i])
+                min_ +=  str(min_list[i])
+
+            for i in range(len(max_list)):
+                max_ += str(max_list[i])
+
+            # print(min_)
+            min_  = int(min_, 2)
+            max_  = int(max_, 2)
+
+            if j != 0:
+                ruleStr += f'^({float(min_)/10} < {attrs[j]} < {float(max_)/10})'
+            else:
+                ruleStr += f'({float(min_)/10} < {attrs[j]} < {float(max_)/10})'
+        
+        pred = rule[-3:]
+        if pred == [1,0,0]:
+            flower = 'Iris-setosa'
+        elif pred == [0,1,0]:
+            flower = 'Iris-versicolor'
+        elif pred == [0,0,1]:
+            flower = 'Iris-virginica'
+        else:
+            flower = 'unknown'
+        ruleStr += f'^(Flower = {flower})'
+        return ruleStr
+    
     def display_tennis_rules(self, P):
         readable_rules = []
         # rule = [0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0]
@@ -136,17 +190,23 @@ class Utils:
             hypo_rules = []
         return readable_rules
                 
-        # print(self.make_readable(rule))
-        # for h in P:
-        #     rule = []
-        #     readable_rule = []
-        #     for bit in h:
-        #         rule.append(bit)
-        #         if len(rule) == 11:
-        #             readable_rule.append(self.make_readable(rule))
-        #     readable_rules.append(readable_rule)
-                    # nCorrect += self.test_rule(rule)
-                    # rule = []
+    def display_iris_rule(self, P):
+        # print(self.make_iris_readable([]))
+        readable_rules = []
+        for h in P:
+            rule = []
+            # readable_rule = []
+            hypo_rules = []
+            for bit in h:
+                rule.append(bit)
+                if len(rule) == (28*2)+3:
+                    aRule = self.make_iris_readable(rule)
+                    # print(aRule)
+                    hypo_rules.append(aRule)
+                    rule = []
+            readable_rules.append(hypo_rules)
+            hypo_rules = []
+        return readable_rules
 
     def arg_parse(self):
         parser = argparse.ArgumentParser()

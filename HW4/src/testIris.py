@@ -50,38 +50,28 @@ if __name__ == '__main__':
     # print(testInputs)
     gabil = Gabil(inputs, targets, verbose=opt.verbose)
 
-    # q = 1000 # n individual rules
-    q = 700
-    # p = 10 #nHypothesese
     p = None
 
     P = -1
     while P == -1:
         executor = ThreadPoolExecutor(max_workers=50)
-        future = executor.submit(gabil.iris, float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
+        future = executor.submit(gabil.irisSelection, float(opt.fitness_thresh), int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), opt.sel_strategy)
+        #  P = gabil.irisSelection(None, int(opt.q), p, float(opt.r), float(opt.m), int(opt.max_gen), 'rank')
         P = future.result()
         # print(P)
         # P = gabil.iris(float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
+
+    readable_rules = utils.display_iris_rule(P)
+    for i, hypo_rule in enumerate(readable_rules):
+        print(f'h{i}')
+        for j, rule in enumerate(hypo_rule):
+            if j == 0:
+                print(rule)
+            else:
+                print(' V ' + rule)
+        print('-'*100)
+
     acc = evaluate(P, inputs, targets)
     utils.log('train acc', acc)
     acc = evaluate(P, testInputs, testTargets)
     utils.log('test acc', acc)
-    # P = gabil.iris(float(opt.fitness_thresh), q, p, float(opt.r), float(opt.m), int(opt.max_gen))
-    # utils.log('inputs', inputs)
-    # floatVals = copy.deepcopy(inputs)
-    # inputs = utils.inputs2IEEE754(inputs)
-    # for i in range(len(inputs)):
-    #     utils.log(f'inputs {len(inputs[i])}', inputs[i])
-    # for j in range(len(outputs)):
-    #     utils.log(f'outputs {len(outputs[i])}', outputs[i])
-    # for binVal, floatVal in zip(inputs[0], floatVals):
-    #     utils.log(f'[{floatVal} | {binVal}')
-    # utils.log('inputs', inputs)
-    # utils.log('outputs', outputs)
-
-    # binary = utils.floatingPoint(4.2)
-    # utils.log(f'binary {len(binary)}', binary)
-    # # Final Floating point Representation.
-    # ieee_32 = str(sign_bit) + '|' + exp_str + '|' + mant_str
-    # # Printing the ieee 32 representation.
-    # print(ieee_32)

@@ -515,6 +515,7 @@ class Gabil:
 
             # Ps, err = self.selectEager(n, P, fitnessCopy)
             # utils.log('n to keep', n)
+            err = False
             if sel_strategy == 'fitness_proportional':
                 Ps, err = self.selectEager(n, P, fitnessCopy)
             elif sel_strategy == 'tournament':
